@@ -19,7 +19,7 @@
 <link rel="preload" href="assets/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="globals.css?v=20260903-pale-blue">
 <link rel="stylesheet" href="products.css?v=20260912-proofstate-nav-exports">
-<link rel="stylesheet" href="vsm.css?v=20260914-problem-posters">
+<link rel="stylesheet" href="vsm.css?v=20260915-bonus-playground">
 <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64x64.png?v=20260907-theme" media="(prefers-color-scheme: light)">
 <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64x64-dark.png?v=20260907-theme" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="assets/favicon-64x64.png">
@@ -224,11 +224,53 @@
   <div class="poster-actions"><a class="btn outline" href="products.html#vsmlite">Back to products</a><a class="btn" href="https://github.com/opensiro/terminal-bench-vsm" target="_blank" rel="noopener">View VSMLite ↗</a><a class="btn outline" href="research.html">Research →</a></div>
   <div class="references"><span>REFERENCES</span><a href="https://uat.store.wiley.com/en-us/brain-of-the-firm-2nd-edition-p-9780471948391" target="_blank" rel="noopener">Stafford Beer — Brain of the Firm ↗</a><a href="https://metaphorum.org/staffords-work/viable-system-model" target="_blank" rel="noopener">Metaphorum — VSM ↗</a><a href="https://github.com/opensiro/terminal-bench-vsm/blob/main/vsmlite-tb/osm.md" target="_blank" rel="noopener">OSM draft ↗</a></div>
 </div></section>
+
+<section class="poster bonus-poster" id="bonus" aria-labelledby="bonus-title"><div class="wrap">
+  <header class="poster-head bonus-head"><span>08 / BONUS</span><h2 id="bonus-title">Architecture<br><em>playground.</em></h2></header>
+  <div class="architecture-templates" role="list" aria-label="VSM architecture templates">
+    <button type="button" data-vsm-template="legion" aria-pressed="true"><span class="architecture-emblem emblem-legion" aria-hidden="true"><i></i></span><b>Roman Legion</b><small>Command lattice</small></button>
+    <button type="button" data-vsm-template="democracy" aria-pressed="false"><span class="architecture-emblem emblem-democracy" aria-hidden="true"><i></i></span><b>Democracy</b><small>Deliberative field</small></button>
+    <button type="button" data-vsm-template="dictatorship" aria-pressed="false"><span class="architecture-emblem emblem-dictatorship" aria-hidden="true"><i></i></span><b>Dictatorship</b><small>Single command</small></button>
+    <button type="button" data-vsm-template="colony" aria-pressed="false"><span class="architecture-emblem emblem-colony" aria-hidden="true"><i></i></span><b>Ant Colony</b><small>Local signals</small></button>
+    <button type="button" data-vsm-template="research" aria-pressed="false"><span class="architecture-emblem emblem-research" aria-hidden="true"><i></i></span><b>Research Federation</b><small>Future-heavy</small></button>
+    <button type="button" data-vsm-template="emergency" aria-pressed="false"><span class="architecture-emblem emblem-emergency" aria-hidden="true"><i></i></span><b>Emergency Network</b><small>Fast coordination</small></button>
+  </div>
+  <div class="architecture-console" data-vsm-playground data-template="legion">
+    <aside class="architecture-controls">
+      <header><span>ACTIVE PROFILE</span><strong data-vsm-profile>ROMAN LEGION</strong><small data-vsm-origin hidden></small></header>
+      <div class="architecture-total">
+        <label for="vsm-total-range">TOTAL AGENT CAPACITY <output data-vsm-total>1,000</output></label>
+        <input type="range" id="vsm-total-range" min="1" max="4" step="0.01" value="3" aria-valuemin="10" aria-valuemax="10000" aria-valuenow="1000">
+        <div><button type="button" data-vsm-total-preset="100">100</button><button type="button" data-vsm-total-preset="500">500</button><button type="button" data-vsm-total-preset="1000">1K</button><button type="button" data-vsm-total-preset="5000">5K</button><button type="button" data-vsm-total-preset="10000">10K</button></div>
+      </div>
+      <fieldset class="architecture-switches"><legend>SYSTEM BOARD</legend>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s5" checked><span><i></i></span><b>S5</b><small>GOVERN</small></label>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s4" checked><span><i></i></span><b>S4</b><small>ADAPT</small></label>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s3" checked><span><i></i></span><b>S3</b><small>REGULATE</small></label>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s3x" checked><span><i></i></span><b>S3*</b><small>VERIFY</small></label>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s2" checked><span><i></i></span><b>S2</b><small>COORDINATE</small></label>
+        <label class="vsm-switch"><input type="checkbox" data-vsm-system="s1" checked><span><i></i></span><b>S1</b><small>OPERATE</small></label>
+      </fieldset>
+    </aside>
+    <figure class="architecture-figure">
+      <figcaption><span>CONCURRENT AGENT SESSIONS</span><strong><b data-vsm-running>1,000</b> / <b data-vsm-capacity>1,000</b> RUNNING</strong></figcaption>
+      <div class="vsm-pyramid" aria-live="polite">
+        <div class="vsm-tier tier-s5" data-vsm-tier="s5"><span><b>S5</b><small>GOVERN</small></span><i><u></u></i><strong data-vsm-count="s5">10</strong></div>
+        <div class="vsm-tier tier-s4" data-vsm-tier="s4"><span><b>S4</b><small>ADAPT</small></span><i><u></u></i><strong data-vsm-count="s4">25</strong></div>
+        <div class="vsm-tier tier-s3" data-vsm-tier="s3"><span><b>S3</b><small>REGULATE</small></span><i><u></u></i><strong data-vsm-count="s3">45</strong></div>
+        <div class="vsm-tier tier-s2" data-vsm-tier="s2"><span><b>S2</b><small>COORDINATE</small></span><i><u></u></i><strong data-vsm-count="s2">120</strong></div>
+        <div class="vsm-tier tier-s1" data-vsm-tier="s1"><span><b>S1</b><small>OPERATE</small></span><i><u></u></i><strong data-vsm-count="s1">800</strong></div>
+        <div class="vsm-audit-channel" data-vsm-audit><span>S3* / INDEPENDENT VERIFY</span><i><u></u></i></div>
+      </div>
+      <div class="architecture-readout"><div><span>INDEPENDENT S1</span><strong data-vsm-independent>800</strong></div><div><span>CONTROL SESSIONS</span><strong data-vsm-control>200</strong></div><div><span>ACTIVE SYSTEMS</span><strong data-vsm-active>6 / 6</strong></div></div>
+    </figure>
+  </div>
+</div></section>
 </main>
 
-<nav class="vsm-section-nav" aria-label="On this page"><div class="wrap"><a href="#overview">Problem</a><a href="#model">Relation model</a><a href="#layers">Layers</a><a href="#fit">When use</a><a href="#autonomy">Autonomy</a><a href="#vsmlite">VSMLite</a></div></nav>
+<nav class="vsm-section-nav" aria-label="On this page"><div class="wrap"><a href="#overview">Problem</a><a href="#model">Relation model</a><a href="#layers">Layers</a><a href="#fit">When use</a><a href="#autonomy">Autonomy</a><a href="#vsmlite">VSMLite</a><a href="#bonus">Bonus</a></div></nav>
 <footer class="site-footer"><div class="wrap"><span class="footer-copy">© 2026 opensiro · all rights reserved</span><div class="footer-links"><a href="products.html">Products</a><a href="vsm-index.html">Index</a><a href="research.html">Research</a></div><p class="footer-font">Set in <a href="https://departuremono.com" target="_blank" rel="noopener">Departure Mono</a> by Helena Zhang · <a href="assets/DepartureMono-OFL.txt" target="_blank">SIL Open Font License 1.1</a></p></div></footer>
 <script src="app.js?v=20260910-vsm" defer></script>
-<script src="vsm.js?v=20260914-problem-posters" defer></script>
+<script src="vsm.js?v=20260915-bonus-playground" defer></script>
 </body>
 </html>

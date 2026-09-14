@@ -146,6 +146,99 @@
   });
   setMaturity(0);
 
+  var playground = document.querySelector('[data-vsm-playground]');
+  if (playground) {
+    var profiles = {
+      legion: { name:'ROMAN LEGION', weights:{ s1:.8, s2:.12, s3:.045, s4:.025, s5:.01 } },
+      democracy: { name:'DEMOCRACY', weights:{ s1:.56, s2:.19, s3:.11, s4:.13, s5:.01 } },
+      dictatorship: { name:'DICTATORSHIP', weights:{ s1:.93, s2:.035, s3:.025, s4:.009, s5:.001 } },
+      colony: { name:'ANT COLONY', weights:{ s1:.97, s2:.02, s3:.006, s4:.003, s5:.001 } },
+      research: { name:'RESEARCH FEDERATION', weights:{ s1:.6, s2:.09, s3:.07, s4:.23, s5:.01 } },
+      emergency: { name:'EMERGENCY NETWORK', weights:{ s1:.69, s2:.21, s3:.06, s4:.035, s5:.005 } }
+    };
+    var coreSystems = ['s1', 's2', 's3', 's4', 's5'];
+    var templateButtons = Array.prototype.slice.call(document.querySelectorAll('[data-vsm-template]'));
+    var systemToggles = Array.prototype.slice.call(playground.querySelectorAll('[data-vsm-system]'));
+    var totalRange = document.getElementById('vsm-total-range');
+    var profileName = playground.querySelector('[data-vsm-profile]');
+    var profileOrigin = playground.querySelector('[data-vsm-origin]');
+    var selectedProfile = 'legion';
+    var currentWeights = profiles.legion.weights;
+
+    function formatCount(value) { return Number(value).toLocaleString('en-US'); }
+    function totalCapacity() { return Math.max(10, Math.min(10000, Math.round(Math.pow(10, Number(totalRange.value))))); }
+    function isSystemOn(key) {
+      var toggle = playground.querySelector('[data-vsm-system="' + key + '"]');
+      return toggle ? toggle.checked : false;
+    }
+    function setCustom() {
+      if (selectedProfile === 'custom') return;
+      profileOrigin.hidden = false;
+      profileOrigin.textContent = 'DERIVED FROM ' + profiles[selectedProfile].name;
+      selectedProfile = 'custom';
+      playground.setAttribute('data-template', 'custom');
+      profileName.textContent = 'CUSTOM';
+      templateButtons.forEach(function (button) { button.setAttribute('aria-pressed', 'false'); });
+    }
+    function renderPlayground() {
+      var total = totalCapacity();
+      var counts = {};
+      var roundedTotal = 0;
+      coreSystems.forEach(function (key) {
+        counts[key] = Math.round(total * currentWeights[key]);
+        roundedTotal += counts[key];
+      });
+      counts.s1 += total - roundedTotal;
+      var running = 0;
+      var maxCount = Math.max.apply(Math, coreSystems.map(function (key) { return counts[key]; }));
+      coreSystems.forEach(function (key) {
+        var enabled = isSystemOn(key);
+        var count = enabled ? counts[key] : 0;
+        running += count;
+        var tier = playground.querySelector('[data-vsm-tier="' + key + '"]');
+        tier.classList.toggle('is-off', !enabled);
+        tier.style.setProperty('--tier-width', count ? Math.max(6, Math.sqrt(count / maxCount) * 100).toFixed(2) + '%' : '0%');
+        playground.querySelector('[data-vsm-count="' + key + '"]').textContent = formatCount(count);
+      });
+      var auditOn = isSystemOn('s3x');
+      playground.querySelector('[data-vsm-audit]').classList.toggle('is-off', !auditOn);
+      var activeSystems = systemToggles.filter(function (toggle) { return toggle.checked; }).length;
+      playground.querySelector('[data-vsm-total]').textContent = formatCount(total);
+      playground.querySelector('[data-vsm-running]').textContent = formatCount(running);
+      playground.querySelector('[data-vsm-capacity]').textContent = formatCount(total);
+      playground.querySelector('[data-vsm-independent]').textContent = formatCount(isSystemOn('s1') ? counts.s1 : 0);
+      playground.querySelector('[data-vsm-control]').textContent = formatCount(running - (isSystemOn('s1') ? counts.s1 : 0));
+      playground.querySelector('[data-vsm-active]').textContent = activeSystems + ' / 6';
+      totalRange.setAttribute('aria-valuenow', String(total));
+      totalRange.setAttribute('aria-valuetext', formatCount(total) + ' total agent sessions');
+    }
+    function selectProfile(key) {
+      selectedProfile = key;
+      currentWeights = profiles[key].weights;
+      playground.setAttribute('data-template', key);
+      profileName.textContent = profiles[key].name;
+      profileOrigin.hidden = true;
+      systemToggles.forEach(function (toggle) { toggle.checked = true; });
+      templateButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-vsm-template') === key)); });
+      renderPlayground();
+    }
+    templateButtons.forEach(function (button) {
+      button.addEventListener('click', function () { selectProfile(button.getAttribute('data-vsm-template')); });
+    });
+    totalRange.addEventListener('input', function () { setCustom(); renderPlayground(); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vsm-total-preset]'), function (button) {
+      button.addEventListener('click', function () {
+        totalRange.value = String(Math.log10(Number(button.getAttribute('data-vsm-total-preset'))));
+        setCustom();
+        renderPlayground();
+      });
+    });
+    systemToggles.forEach(function (toggle) {
+      toggle.addEventListener('change', function () { setCustom(); renderPlayground(); });
+    });
+    renderPlayground();
+  }
+
   var sectionNav = document.querySelector('.vsm-section-nav');
   if (sectionNav) {
     var sectionLinks = Array.prototype.slice.call(sectionNav.querySelectorAll('a[href^="#"]'));
