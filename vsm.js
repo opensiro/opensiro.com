@@ -150,7 +150,7 @@
   if (playground) {
     var profiles = {
       legion: { name:'ROMAN LEGION', min:1000, s5:5, weights:{ s1:.79, s2:.12, s3:.04, s3x:.015, s4:.025, s5:.01 } },
-      democracy: { name:'DEMOCRACY', min:1000, s5:10, weights:{ s1:.54, s2:.18, s3:.10, s3x:.04, s4:.13, s5:.01 } },
+      democracy: { name:'DEMOCRACY', min:1000, s5:50, s5Mode:'max', weights:{ s1:.54, s2:.18, s3:.10, s3x:.04, s4:.13, s5:.01 } },
       dictatorship: { name:'DICTATORSHIP', min:500, s5:1, weights:{ s1:.925, s2:.035, s3:.025, s3x:.005, s4:.009, s5:.001 } },
       colony: { name:'ANT COLONY', min:5000, s5:1, weights:{ s1:.965, s2:.02, s3:.006, s3x:.005, s4:.003, s5:.001 } },
       research: { name:'RESEARCH FEDERATION', min:500, s5:8, weights:{ s1:.58, s2:.08, s3:.06, s3x:.06, s4:.21, s5:.01 } },
@@ -160,15 +160,41 @@
     var pyramidSystems = ['s1', 's2', 's3', 's4', 's5'];
     var templateButtons = Array.prototype.slice.call(document.querySelectorAll('[data-vsm-template]'));
     var systemToggles = Array.prototype.slice.call(playground.querySelectorAll('[data-vsm-system]'));
+    var allocationInputs = Array.prototype.slice.call(playground.querySelectorAll('[data-vsm-allocation]'));
     var totalRange = document.getElementById('vsm-total-range');
+    var minimumTrack = playground.querySelector('[data-vsm-minimum-track]');
+    var minimumValue = playground.querySelector('[data-vsm-minimum]');
     var profileName = playground.querySelector('[data-vsm-profile]');
     var profileRequirement = playground.querySelector('[data-vsm-requirement]');
     var profileOrigin = playground.querySelector('[data-vsm-origin]');
     var selectedProfile = 'legion';
-    var currentWeights = profiles.legion.weights;
+    var currentWeights = Object.assign({}, profiles.legion.weights);
 
     function formatCount(value) { return Number(value).toLocaleString('en-US'); }
     function totalCapacity() { return Math.max(10, Math.min(10000, Math.round(Math.pow(10, Number(totalRange.value))))); }
+    function shortCount(value) { return value >= 1000 ? (value / 1000) + 'K' : String(value); }
+    function setMinimum(profile) {
+      minimumTrack.style.setProperty('--minimum-position', (((Math.log10(profile.min) - 1) / 3) * 100).toFixed(2) + '%');
+      minimumValue.textContent = shortCount(profile.min);
+    }
+    function syncAllocationInputs() {
+      allocationInputs.forEach(function (input) {
+        var key = input.getAttribute('data-vsm-allocation');
+        var percent = currentWeights[key] * 100;
+        input.value = percent.toFixed(1);
+        playground.querySelector('[data-vsm-allocation-value="' + key + '"]').textContent = percent.toFixed(1) + '%';
+      });
+    }
+    function adjustAllocation(changedKey, percent) {
+      var changedWeight = Math.max(0, Math.min(1, percent / 100));
+      var remaining = 1 - changedWeight;
+      var otherTotal = sessionSystems.reduce(function (sum, key) { return sum + (key === changedKey ? 0 : currentWeights[key]); }, 0);
+      sessionSystems.forEach(function (key) {
+        if (key === changedKey) currentWeights[key] = changedWeight;
+        else currentWeights[key] = otherTotal ? currentWeights[key] / otherTotal * remaining : remaining / (sessionSystems.length - 1);
+      });
+      syncAllocationInputs();
+    }
     function isSystemOn(key) {
       var toggle = playground.querySelector('[data-vsm-system="' + key + '"]');
       return toggle ? toggle.checked : false;
@@ -191,10 +217,13 @@
         counts[key] = Math.round(total * currentWeights[key]);
         roundedTotal += counts[key];
       });
-      counts.s1 += total - roundedTotal;
+      var correctionKey = sessionSystems.reduce(function (largest, key) { return counts[key] > counts[largest] ? key : largest; }, sessionSystems[0]);
+      counts[correctionKey] += total - roundedTotal;
       if (selectedProfile !== 'custom') {
-        counts.s1 += counts.s5 - profiles[selectedProfile].s5;
-        counts.s5 = profiles[selectedProfile].s5;
+        var profile = profiles[selectedProfile];
+        var constrainedS5 = profile.s5Mode === 'max' ? Math.min(counts.s5, profile.s5) : profile.s5;
+        counts.s1 += counts.s5 - constrainedS5;
+        counts.s5 = constrainedS5;
       }
       var running = sessionSystems.reduce(function (sum, key) { return sum + (isSystemOn(key) ? counts[key] : 0); }, 0);
       var maxCount = Math.max.apply(Math, pyramidSystems.map(function (key) { return counts[key]; }));
@@ -221,11 +250,13 @@
     }
     function selectProfile(key) {
       selectedProfile = key;
-      currentWeights = profiles[key].weights;
+      currentWeights = Object.assign({}, profiles[key].weights);
       if (totalCapacity() < profiles[key].min) totalRange.value = String(Math.log10(profiles[key].min));
+      setMinimum(profiles[key]);
+      syncAllocationInputs();
       playground.setAttribute('data-template', key);
       profileName.textContent = profiles[key].name;
-      profileRequirement.textContent = 'MIN ' + formatCount(profiles[key].min) + ' · FIXED S5 × ' + profiles[key].s5;
+      profileRequirement.textContent = 'MIN ' + formatCount(profiles[key].min) + ' · ' + (profiles[key].s5Mode === 'max' ? 'MAX' : 'FIXED') + ' S5 × ' + profiles[key].s5;
       profileOrigin.hidden = true;
       systemToggles.forEach(function (toggle) { toggle.checked = true; });
       templateButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-vsm-template') === key)); });
@@ -234,17 +265,29 @@
     templateButtons.forEach(function (button) {
       button.addEventListener('click', function () { selectProfile(button.getAttribute('data-vsm-template')); });
     });
-    totalRange.addEventListener('input', function () { setCustom(); renderPlayground(); });
+    totalRange.addEventListener('input', function () {
+      if (selectedProfile !== 'custom' && totalCapacity() < profiles[selectedProfile].min) setCustom();
+      renderPlayground();
+    });
     Array.prototype.forEach.call(document.querySelectorAll('[data-vsm-total-preset]'), function (button) {
       button.addEventListener('click', function () {
         totalRange.value = String(Math.log10(Number(button.getAttribute('data-vsm-total-preset'))));
-        setCustom();
+        if (selectedProfile !== 'custom' && totalCapacity() < profiles[selectedProfile].min) setCustom();
         renderPlayground();
       });
     });
     systemToggles.forEach(function (toggle) {
       toggle.addEventListener('change', function () { setCustom(); renderPlayground(); });
     });
+    allocationInputs.forEach(function (input) {
+      input.addEventListener('input', function () {
+        adjustAllocation(input.getAttribute('data-vsm-allocation'), Number(input.value));
+        setCustom();
+        renderPlayground();
+      });
+    });
+    setMinimum(profiles.legion);
+    syncAllocationInputs();
     renderPlayground();
   }
 
