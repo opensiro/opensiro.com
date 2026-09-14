@@ -544,11 +544,12 @@ hr.rule{border:0;border-top:1px solid var(--hairline);margin:0}
   .arctic-hero{min-height:710px;padding-top:64px;padding-bottom:210px}
 }
 @media(max-width:540px){
-  .site-header .wrap{min-height:68px;padding:0 16px}
+  .site-header .wrap{min-height:68px;padding:0 16px;gap:8px}
   .brand-wordmark{gap:7px}
   .brand-name{font-size:12px;letter-spacing:.05em}
   .brand-pronunciation{font-size:7px}
-  .nav-links .btn-stamp{font-size:10px;padding:0 8px;letter-spacing:0}
+  .nav-links{flex:1;min-width:0;justify-content:flex-end;gap:4px}
+  .nav-links .btn-stamp{font-size:9px;padding:0 clamp(4px,1.6vw,7px);letter-spacing:0}
   .brand-pronunciation{display:none}
   .home-hero{min-height:710px;padding:48px 0 75px}
   .hero .hero-inner{padding-left:30px;padding-right:30px}
