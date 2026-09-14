@@ -655,7 +655,7 @@
  .vsm-pyramid{min-height:500px}.architecture-figure>figcaption{display:grid}.architecture-readout>div{padding:16px}
 }
 @media(max-width:560px){
- .architecture-templates{grid-template-columns:1fr 1fr}.architecture-templates button{grid-template-columns:44px 1fr;min-height:82px;padding:10px;border-right:1px solid #bcb3a8!important;border-bottom:1px solid #bcb3a8}.architecture-templates button:nth-child(even){border-right:0!important}.architecture-templates button:nth-last-child(-n+2){border-bottom:0}.architecture-emblem{width:44px;height:44px;transform:scale(.82);transform-origin:left center}
+ .architecture-templates{grid-template-columns:1fr 1fr}.architecture-templates button{grid-template-columns:44px minmax(0,1fr);min-height:94px;padding:10px;border-right:1px solid #bcb3a8!important;border-bottom:1px solid #bcb3a8}.architecture-templates button:nth-child(even){border-right:0!important}.architecture-templates button:nth-last-child(-n+2){border-bottom:0}.architecture-emblem{justify-self:center;width:54px;height:54px;transform:scale(.8);transform-origin:center}
  .architecture-switches{grid-template-columns:1fr 1fr}.vsm-pyramid{min-height:450px;padding:24px 36px}.vsm-tier{grid-template-columns:58px 1fr 58px;gap:7px;min-height:62px}.vsm-tier>span{grid-template-columns:1fr}.vsm-tier>span small{display:none}.vsm-tier>i{height:34px}.vsm-tier>strong{font-size:.78rem}.vsm-audit-channel{right:7px}.architecture-readout strong{font-size:.95rem}.architecture-readout span{font-size:.45rem}
 }
 @media(prefers-reduced-motion:reduce){.vsm-tier>i u{transition:none}.vsm-audit-channel>i u{animation:none}}
