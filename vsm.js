@@ -149,18 +149,20 @@
   var playground = document.querySelector('[data-vsm-playground]');
   if (playground) {
     var profiles = {
-      legion: { name:'ROMAN LEGION', weights:{ s1:.8, s2:.12, s3:.045, s4:.025, s5:.01 } },
-      democracy: { name:'DEMOCRACY', weights:{ s1:.56, s2:.19, s3:.11, s4:.13, s5:.01 } },
-      dictatorship: { name:'DICTATORSHIP', weights:{ s1:.93, s2:.035, s3:.025, s4:.009, s5:.001 } },
-      colony: { name:'ANT COLONY', weights:{ s1:.97, s2:.02, s3:.006, s4:.003, s5:.001 } },
-      research: { name:'RESEARCH FEDERATION', weights:{ s1:.6, s2:.09, s3:.07, s4:.23, s5:.01 } },
-      emergency: { name:'EMERGENCY NETWORK', weights:{ s1:.69, s2:.21, s3:.06, s4:.035, s5:.005 } }
+      legion: { name:'ROMAN LEGION', min:1000, s5:5, weights:{ s1:.79, s2:.12, s3:.04, s3x:.015, s4:.025, s5:.01 } },
+      democracy: { name:'DEMOCRACY', min:1000, s5:10, weights:{ s1:.54, s2:.18, s3:.10, s3x:.04, s4:.13, s5:.01 } },
+      dictatorship: { name:'DICTATORSHIP', min:500, s5:1, weights:{ s1:.925, s2:.035, s3:.025, s3x:.005, s4:.009, s5:.001 } },
+      colony: { name:'ANT COLONY', min:5000, s5:1, weights:{ s1:.965, s2:.02, s3:.006, s3x:.005, s4:.003, s5:.001 } },
+      research: { name:'RESEARCH FEDERATION', min:500, s5:8, weights:{ s1:.58, s2:.08, s3:.06, s3x:.06, s4:.21, s5:.01 } },
+      emergency: { name:'EMERGENCY NETWORK', min:100, s5:3, weights:{ s1:.67, s2:.20, s3:.06, s3x:.03, s4:.035, s5:.005 } }
     };
-    var coreSystems = ['s1', 's2', 's3', 's4', 's5'];
+    var sessionSystems = ['s1', 's2', 's3', 's3x', 's4', 's5'];
+    var pyramidSystems = ['s1', 's2', 's3', 's4', 's5'];
     var templateButtons = Array.prototype.slice.call(document.querySelectorAll('[data-vsm-template]'));
     var systemToggles = Array.prototype.slice.call(playground.querySelectorAll('[data-vsm-system]'));
     var totalRange = document.getElementById('vsm-total-range');
     var profileName = playground.querySelector('[data-vsm-profile]');
+    var profileRequirement = playground.querySelector('[data-vsm-requirement]');
     var profileOrigin = playground.querySelector('[data-vsm-origin]');
     var selectedProfile = 'legion';
     var currentWeights = profiles.legion.weights;
@@ -178,23 +180,27 @@
       selectedProfile = 'custom';
       playground.setAttribute('data-template', 'custom');
       profileName.textContent = 'CUSTOM';
+      profileRequirement.textContent = 'FREE ALLOCATION';
       templateButtons.forEach(function (button) { button.setAttribute('aria-pressed', 'false'); });
     }
     function renderPlayground() {
       var total = totalCapacity();
       var counts = {};
       var roundedTotal = 0;
-      coreSystems.forEach(function (key) {
+      sessionSystems.forEach(function (key) {
         counts[key] = Math.round(total * currentWeights[key]);
         roundedTotal += counts[key];
       });
       counts.s1 += total - roundedTotal;
-      var running = 0;
-      var maxCount = Math.max.apply(Math, coreSystems.map(function (key) { return counts[key]; }));
-      coreSystems.forEach(function (key) {
+      if (selectedProfile !== 'custom') {
+        counts.s1 += counts.s5 - profiles[selectedProfile].s5;
+        counts.s5 = profiles[selectedProfile].s5;
+      }
+      var running = sessionSystems.reduce(function (sum, key) { return sum + (isSystemOn(key) ? counts[key] : 0); }, 0);
+      var maxCount = Math.max.apply(Math, pyramidSystems.map(function (key) { return counts[key]; }));
+      pyramidSystems.forEach(function (key) {
         var enabled = isSystemOn(key);
         var count = enabled ? counts[key] : 0;
-        running += count;
         var tier = playground.querySelector('[data-vsm-tier="' + key + '"]');
         tier.classList.toggle('is-off', !enabled);
         tier.style.setProperty('--tier-width', count ? Math.max(6, Math.sqrt(count / maxCount) * 100).toFixed(2) + '%' : '0%');
@@ -202,6 +208,7 @@
       });
       var auditOn = isSystemOn('s3x');
       playground.querySelector('[data-vsm-audit]').classList.toggle('is-off', !auditOn);
+      playground.querySelector('[data-vsm-audit-count]').textContent = formatCount(auditOn ? counts.s3x : 0);
       var activeSystems = systemToggles.filter(function (toggle) { return toggle.checked; }).length;
       playground.querySelector('[data-vsm-total]').textContent = formatCount(total);
       playground.querySelector('[data-vsm-running]').textContent = formatCount(running);
@@ -215,8 +222,10 @@
     function selectProfile(key) {
       selectedProfile = key;
       currentWeights = profiles[key].weights;
+      if (totalCapacity() < profiles[key].min) totalRange.value = String(Math.log10(profiles[key].min));
       playground.setAttribute('data-template', key);
       profileName.textContent = profiles[key].name;
+      profileRequirement.textContent = 'MIN ' + formatCount(profiles[key].min) + ' · FIXED S5 × ' + profiles[key].s5;
       profileOrigin.hidden = true;
       systemToggles.forEach(function (toggle) { toggle.checked = true; });
       templateButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-vsm-template') === key)); });
