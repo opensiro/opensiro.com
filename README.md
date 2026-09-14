@@ -20,12 +20,15 @@ opensiro-web/
 ├── index.html       # landing — hero, mission, products & research previews
 ├── products.html    # vsmlite + opensiro overview
 ├── opensiro.html    # Cross-Flash sandbox article and synchronized run playback
+├── vsm-index.html   # VSM Harness Index table + pinned GitHub refs
+├── vsm-index.css    # VSM table, state, combo, and lightning styles
+├── vsm-index.js     # A/C counts, ranking, sorting, and lightning
 ├── products.css     # product hero and inline term styles
 ├── products.js      # accessible inline term explanations
 ├── research.html    # ARCTIC detail + animated public training examples
 ├── research.js      # play on entry, pause offscreen, replay, reduced motion
 ├── globals.css      # tokens, @font-face, components (monochrome monospace)
-├── app.js           # active nav for the shared Products/Research links
+├── app.js           # active nav for the shared Products/Index/Research links
 ├── vines.js         # continuous central vine growth and viewport tracking
 ├── shared-hero.css  # aligned home/product heroes and copy transitions
 ├── hero-transition.js # native page transition guards for the shared heroes
@@ -107,7 +110,7 @@ opensiro-web/
   and palette. See `assets/arctic/README.md` for source, attribution, and rebuilding.
 - `prefers-reduced-motion` shows the full vines and static product marks and
   keeps the existing still-image fallback for the mascot.
-- Products and Research stay visible in the header on mobile, with no drawer.
+- Products, Index, and Research stay visible in the header on mobile, with no drawer.
   Both decorative side vines remain visible down to 320 px. Links and buttons
   have visible keyboard focus.
 
@@ -117,9 +120,10 @@ opensiro-web/
 |-------------------|-----------------|-------------------------------------------|
 | `/`               | `index.html`    | Hero, introduction, three-step approach, products & ARCTIC |
 | `/products.html`  | `products.html` | vsmlite + opensiro detail blocks            |
+| `/vsm-index.html` | `vsm-index.html`| VSM Harness Index overview + source links |
 | `/research.html`  | `research.html` | ARCTIC detail + stats + CTA               |
 
-Each page shares the same sticky header (logo + Products/Research nav), footer
+Each page shares the same sticky header (logo + Products/Index/Research nav), footer
 (copyright + site links + font attribution). Social links are paused in HTML
 comments, ready to restore when the channels are available. The active nav item is
 marked with `.active` in markup and re-asserted by `app.js` from
@@ -130,6 +134,7 @@ marked with `.active` in markup and re-asserted by `app.js` from
 Inter-page links are relative. External product links point at GitHub:
 
 - `https://github.com/opensiro/terminal-bench-vsm` — vsmlite repo
+- `https://github.com/opensiro/vsm-harness-index` — evidence-backed VSM harness catalog
 - `https://github.com/opensiro/arctic-0` — ARCTIC-0 public archive
 
 Paused social links (not rendered): `twitter.com/opensiro`, `youtube.com/@opensiro`,
