@@ -2,6 +2,20 @@
 (function () {
   'use strict';
 
+  var motionPosters = Array.prototype.slice.call(document.querySelectorAll('.problem-motion'));
+  if (motionPosters.length) {
+    if ('IntersectionObserver' in window) {
+      var motionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { rootMargin: '-12% 0px -12% 0px', threshold: .08 });
+      motionPosters.forEach(function (poster) { motionObserver.observe(poster); });
+    } else {
+      motionPosters.forEach(function (poster) { poster.classList.add('is-visible'); });
+    }
+  }
+
   var systems = {
     s1: { code:'S1 / OPERATION', title:'Run the operations', thesis:'Autonomous units meet their own local environments.', label:'S1 units exchange work with local environments', scene:'TOOL / WORK CASE' },
     s2: { code:'S2 / COORDINATION', title:'Dampen oscillation', thesis:'Coordinate interactions without taking over S1.', label:'S2 dampens oscillation between S1 units', scene:'RADIO / SIGNAL DESK' },
