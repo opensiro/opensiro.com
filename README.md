@@ -18,6 +18,8 @@ Runtime remains dependency-free. Regenerating the stabilized mascot GIF requires
 ```
 opensiro-web/
 ├── index.html       # landing — hero, mission, products & research previews
+├── design.html      # footer-only mascot/logo download and typeface credits
+├── design.css       # design documentation page styles
 ├── products.html    # vsmlite + opensiro overview
 ├── opensiro.html    # Cross-Flash sandbox article and synchronized run playback
 ├── vsm-index.html   # VSM Harness Index table + pinned GitHub refs
@@ -39,6 +41,9 @@ opensiro-web/
 │   ├── mascot-logo.gif        # stabilized animated hero mascot
 │   ├── mascot-logo.png        # reduced-motion fallback + nav mascot
 │   ├── mascot-favicon.png     # alternate square mascot icon
+│   ├── opensiro-mascot-kit.zip # mascot files + MIT notice
+│   ├── opensiro-logo-kit.zip   # square, full, thin SVG logos + notices
+│   ├── logo/                  # logo-factory source and outlined variants
 │   ├── favicon-64x64.png      # wider browser + touch icon
 │   ├── vsmlite-mark.svg      # animated parent/child mark
 │   ├── opensiro-mark.svg     # animated benchmark mark
@@ -119,12 +124,13 @@ opensiro-web/
 | Route             | File            | Content                                   |
 |-------------------|-----------------|-------------------------------------------|
 | `/`               | `index.html`    | Hero, introduction, three-step approach, products & ARCTIC |
+| `/design.html`    | `design.html`   | mascot and logo downloads, typeface and licenses |
 | `/products.html`  | `products.html` | vsmlite + opensiro detail blocks            |
 | `/vsm-index.html` | `vsm-index.html`| VSM Harness Index overview + source links |
 | `/research.html`  | `research.html` | ARCTIC detail + stats + CTA               |
 
 Each page shares the same sticky header (logo + Products/Index/Research nav), footer
-(copyright + site links + font attribution). Social links are paused in HTML
+(copyright + site links, including footer-only Design). Social links are paused in HTML
 comments, ready to restore when the channels are available. The active nav item is
 marked with `.active` in markup and re-asserted by `app.js` from
 `location.pathname`.

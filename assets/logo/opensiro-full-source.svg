@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="200" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Оригинальная иконка (масштабирована и размещена слева) -->
+  <g transform="scale(7.692307692307692) translate(-19, -19)">
+    <!-- Пиксельные границы (синие) -->
+    <!-- 4 большие угловые точки -->
+    <rect x="23" y="23" width="3" height="3" fill="#4488FF"/>
+    <rect x="38" y="23" width="3" height="3" fill="#4488FF"/>
+    <rect x="23" y="38" width="3" height="3" fill="#4488FF"/>
+    <rect x="38" y="38" width="3" height="3" fill="#4488FF"/>
+
+    <!-- Вторичные пиксели (синие) -->
+    <!-- Верх -->
+    <rect x="26" y="21" width="2" height="2" fill="#3366FF"/>
+    <rect x="36" y="21" width="2" height="2" fill="#3366FF"/>
+
+    <!-- Низ -->
+    <rect x="26" y="41" width="2" height="2" fill="#3366FF"/>
+    <rect x="36" y="41" width="2" height="2" fill="#3366FF"/>
+
+    <!-- Лево -->
+    <rect x="21" y="27" width="2" height="2" fill="#3366FF"/>
+    <rect x="21" y="33" width="2" height="2" fill="#3366FF"/>
+
+    <!-- Право -->
+    <rect x="41" y="27" width="2" height="2" fill="#3366FF"/>
+    <rect x="41" y="33" width="2" height="2" fill="#3366FF"/>
+
+    <rect x="34" y="29" width="0.5" height="1" fill="#000000"/>
+    <rect x="32" y="29" width="0.5" height="1" fill="#000000"/>
+
+    <!-- 白 — теперь ЧЁРНЫЙ -->
+    <rect x="34" y="29" width="0.5" height="1" fill="#000000"/>
+    <rect x="32" y="29" width="0.5" height="1" fill="#000000"/>
+
+    <!-- Верхняя горизонтальная черта -->
+    <rect x="28" y="26" width="8" height="2" fill="#000000"/>
+
+    <!-- Левая вертикальная черта -->
+    <rect x="27" y="26" width="2" height="12" fill="#000000"/>
+
+    <!-- Правая верхняя вертикальная черта -->
+    <rect x="35" y="26" width="2" height="12" fill="#000000"/>
+
+    <!-- Средняя горизонтальная черта -->
+    <rect x="28" y="31" width="8" height="2" fill="#000000"/>
+
+    <!-- Нижняя горизонтальная черта -->
+    <rect x="28" y="35" width="8" height="2" fill="#000000"/>
+
+    <!-- Косая черта -->
+    <rect x="30" y="25" width="1" height="1" fill="#000000"/>
+    <rect x="31" y="24" width="1" height="1" fill="#000000"/>
+  </g>
+
+  <!-- Текст "Opensiro" справа (шрифт Departure Mono) -->
+  <text
+    x="200"
+    y="100"
+    font-family="'Departure Mono'"
+    font-size="60"
+    fill="#000000"
+    font-weight="700"
+    letter-spacing="-1.5px"
+    text-anchor="start"
+    dominant-baseline="middle">Opensiro</text>
+  <text
+    x="270"
+    y="140"
+    font-family="'Departure Mono'"
+    font-size="20"
+    fill="#000000"
+    font-weight="700"
+    letter-spacing="-1.5px"
+    text-anchor="start"
+    dominant-baseline="middle">[o-pen-shi-ro]</text>
+  <style>
+	@font-face {
+	  font-family: 'Departure Mono';
+	  src: url('DepartureMono-Regular.woff2') format('woff2');
+	  font-weight: 400;
+	  font-style: normal;
+	  font-display: swap;
+	}
+	</style>
+</svg>

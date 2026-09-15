@@ -73,3 +73,24 @@ brand. No additional text, no logos other than the specified wordmark,
 no gradients, no shadows, no rounded cards. Composition should read clearly
 when cropped or reduced as a social-preview thumbnail. Generate one landscape
 image, approximately 1536x1024.
+
+## Logo downloads
+
+`logo/opensiro-square-256.png` and `logo/opensiro-square-128.png` are copied from
+`assets-projects/logo-factory/pixel-art/`. `logo/opensiro-symbol.svg` and
+`logo/opensiro-full-source.svg` preserve the original logo-factory vectors.
+`logo/opensiro-thin-source.svg` uses the same pixel rectangles in a compact
+horizontal composition matching the site's navigation proportions.
+
+The public `opensiro-full.svg` and `opensiro-thin.svg` have Departure Mono text
+converted to paths, so they display correctly without a locally installed font.
+The two source SVGs retain editable text. The logo download kit includes the
+Departure Mono OFL notice because the outlined wordmark comes from that font.
+
+`logo/opensiro-nav-thin.svg` matches the live navigation more closely: it embeds
+the bundled mascot PNG and uses outlined Departure Mono for the wordmark and
+pronunciation. Its editable-text source is `opensiro-nav-thin-source.svg`.
+
+The square logo also has a matching vector file:
+`logo/opensiro-square-256.svg` is copied from logo-factory `opensiro_ro.svg`,
+renamed to share the 1:1 PNG stem and sized to a 256 × 256 SVG viewport.
