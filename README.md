@@ -54,9 +54,11 @@ opensiro-web/
 │   └── ARTWORK.md            # generated-asset prompts and behavior
 ├── scripts/
 │   ├── stabilize-mascot-gif.py
-│   └── build-arctic-assets.py # exact grid diagrams from public ARCTIC-0 pairs
+│   ├── build-arctic-assets.py # exact grid diagrams from public ARCTIC-0 pairs
+│   └── sync-index-preview.cjs # refresh home preview from the ranked table
 ├── tests/
 │   ├── garden-sync.test.cjs
+│   ├── index-preview-sync.test.cjs
 │   └── static-site.test.cjs
 └── README.md
 ```
@@ -145,6 +147,11 @@ Inter-page links are relative. External product links point at GitHub:
 
 Paused social links (not rendered): `twitter.com/opensiro`, `youtube.com/@opensiro`,
 `discord.gg/opensiro`.
+
+The four rows in the home Index preview come from the first four rows of the Top 20 table in `vsm-index.html`.
+After editing the full table, run `node scripts/sync-index-preview.cjs` to refresh `index.html`.
+Run it with `--check` to report stale output without editing. The GitHub Pages workflow
+syncs and checks the preview before publishing.
 
 ## Run
 

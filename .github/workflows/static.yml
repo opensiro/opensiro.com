@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Sync home Index preview
+        run: node scripts/sync-index-preview.cjs
+      - name: Check static pages and Index sync
+        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
