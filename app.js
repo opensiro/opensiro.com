@@ -1,7 +1,7 @@
 /* =====================================================================
    opensiro — app.js
-   Vanilla, no dependencies. Active-nav highlight for the shared two-link navigation.
-   Shared across index.html, products.html, opensiro.html, research.html.
+   Vanilla, no dependencies. Active-nav highlight for the shared navigation.
+   Shared across all site pages.
    ===================================================================== */
 (function () {
   'use strict';
@@ -11,12 +11,13 @@
   /* ----------------------------------------------------- active nav by page
      The .active class is baked into each page's markup (works without
      JS). This re-asserts it from location.pathname as a guard, mapping
-     the current file to a data-nav value (products | research). */
+     the current file to a data-nav value (products | index | research). */
   (function setActiveNav() {
     var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     var current = file === '' || file === '/' || file === 'index.html'
-      ? null                       // home has no Products/Research active state
+      ? null                       // home has no active state
       : (file === 'opensiro.html' || file === 'vsm.html') ? 'products'
+      : file === 'vsm-index.html' ? 'index'
       : file.replace(/\.html$/, ''); // products.html -> products
     if (!current) return;
     $all('[data-nav]').forEach(function (el) {
