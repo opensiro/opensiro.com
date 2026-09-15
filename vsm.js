@@ -293,9 +293,29 @@
 
   var sectionNav = document.querySelector('.vsm-section-nav');
   if (sectionNav) {
+    var sectionNavTrack = sectionNav.querySelector('.wrap');
     var sectionLinks = Array.prototype.slice.call(sectionNav.querySelectorAll('a[href^="#"]'));
     var sectionTargets = sectionLinks.map(function (link) { return document.querySelector(link.getAttribute('href')); });
     var sectionFrame = null;
+    var sectionActive = -1;
+    var sectionReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function revealSection(index, animate) {
+      var link = sectionLinks[index];
+      if (!link || !sectionNavTrack || sectionNavTrack.scrollWidth <= sectionNavTrack.clientWidth) return;
+      var target = link.offsetLeft - (sectionNavTrack.clientWidth - link.offsetWidth) / 2;
+      sectionNavTrack.scrollTo({ left: Math.max(0, target), behavior: animate && !sectionReduceMotion.matches ? 'smooth' : 'auto' });
+    }
+    function selectSection(index, animate) {
+      if (index === sectionActive) return;
+      sectionActive = index;
+      sectionLinks.forEach(function (link, linkIndex) {
+        var active = linkIndex === index;
+        link.classList.toggle('is-active', active);
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      revealSection(index, animate);
+    }
     function syncSectionNav() {
       sectionFrame = null;
       var marker = window.innerHeight * .34;
@@ -303,17 +323,15 @@
       sectionTargets.forEach(function (section, index) {
         if (section && section.getBoundingClientRect().top <= marker) activeIndex = index;
       });
-      sectionLinks.forEach(function (link, index) {
-        var active = index === activeIndex;
-        link.classList.toggle('is-active', active);
-        if (active) link.setAttribute('aria-current', 'location');
-        else link.removeAttribute('aria-current');
-      });
+      selectSection(activeIndex, true);
     }
     window.addEventListener('scroll', function () {
       if (sectionFrame === null) sectionFrame = requestAnimationFrame(syncSectionNav);
     }, { passive: true });
-    sectionLinks.forEach(function (link) { link.addEventListener('click', syncSectionNav); });
-    syncSectionNav();
+    sectionLinks.forEach(function (link, index) { link.addEventListener('click', function () { selectSection(index, true); }); });
+    window.addEventListener('resize', function () { revealSection(sectionActive, false); });
+    var hashIndex = sectionLinks.findIndex(function (link) { return link.getAttribute('href') === location.hash; });
+    if (hashIndex >= 0) selectSection(hashIndex, false);
+    else syncSectionNav();
   }
 })();

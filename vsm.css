@@ -659,3 +659,9 @@
  .architecture-switches{grid-template-columns:1fr 1fr}.vsm-pyramid{min-height:450px;padding:24px 36px}.vsm-tier{grid-template-columns:58px 1fr 58px;gap:7px;min-height:62px}.vsm-tier>span{grid-template-columns:1fr}.vsm-tier>span small{display:none}.vsm-tier>i{height:34px}.vsm-tier>strong{font-size:.78rem}.vsm-audit-channel{right:7px}.architecture-readout strong{font-size:.95rem}.architecture-readout span{font-size:.45rem}
 }
 @media(prefers-reduced-motion:reduce){.vsm-tier>i u{transition:none}.vsm-audit-channel>i u{animation:none}}
+
+/* Keep the active section visible in the mobile table-of-contents rail. */
+@media(max-width:680px){
+ .vsm-section-nav .wrap{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+ .vsm-section-nav a{padding:13px 12px;font-size:.68rem;scroll-snap-align:center}
+}
