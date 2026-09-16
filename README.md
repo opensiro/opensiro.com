@@ -3,7 +3,7 @@
 Static multi-page site for **opensiro** — the company building the toolchain for
 organizations that compile, and the ARCTIC reasoning benchmark.
 
-The design uses Departure Mono, warm off-white backgrounds, sharp corners,
+The typography pairs Departure Mono with Instrument Sans. The design uses warm off-white backgrounds, sharp corners,
 hairline dividers, and pale blue artwork with darker blue link accents. The home page explains the
 work in plain language; each product has its own animated pixel mark.
 Built as plain HTML/CSS/JS, with no runtime dependencies.
@@ -29,7 +29,7 @@ opensiro-web/
 ├── products.js      # accessible inline term explanations
 ├── research.html    # ARCTIC detail + animated public training examples
 ├── research.js      # play on entry, pause offscreen, replay, reduced motion
-├── globals.css      # tokens, @font-face, components (monochrome monospace)
+├── globals.css      # tokens, @font-face, components (mono interface + sans body)
 ├── app.js           # active nav for the shared Products/Index/Research links
 ├── vines.js         # continuous central vine growth and viewport tracking
 ├── shared-hero.css  # aligned home/product heroes and copy transitions
@@ -38,6 +38,8 @@ opensiro-web/
 │   ├── DepartureMono-Regular.woff2
 │   ├── DepartureMono-Regular.woff
 │   ├── DepartureMono-OFL.txt    # Departure Mono license (OFL-1.1)
+│   ├── InstrumentSans-Regular.woff2
+│   ├── InstrumentSans-OFL.txt # Instrument Sans license (OFL-1.1)
 │   ├── mascot-logo.gif        # stabilized animated hero mascot
 │   ├── mascot-logo.png        # reduced-motion fallback + nav mascot
 │   ├── mascot-favicon.png     # alternate square mascot icon
@@ -73,7 +75,8 @@ opensiro-web/
 | `--tint`     | `rgba(0,0,0,.04)`                  | 4% section wash                |
 | `--accent`   | `#9bafd2`                          | pale blue marks, ARCTIC hover  |
 | `--accent-ink` | `#49658e`                        | readable links and focus       |
-| `--font`     | `'DepartureMono', monospace`       | one typeface, everywhere       |
+| `--font`     | `'DepartureMono', monospace`       | headings and interface text    |
+| `--font-body` | `'InstrumentSans', sans-serif`   | research body paragraphs   |
 | `--maxw`     | `1200px`                           | content width                  |
 
 **Signature rules:**
@@ -189,6 +192,7 @@ The following licenses apply to this repository:
 |-----------|---------|-------|
 | Landing source (HTML, CSS, JS) + mascot artwork | **MIT** | © 2026 opensiro |
 | `Departure Mono` typeface (`assets/DepartureMono-Regular.*`) | **SIL Open Font License 1.1 (OFL-1.1)** | © 2022–2024 Helena Zhang |
+| `Instrument Sans` typeface (`assets/InstrumentSans-Regular.woff2`) | **SIL Open Font License 1.1 (OFL-1.1)** | © 2022 The Instrument Sans Project Authors |
 | ARCTIC-0 training pairs and derived grid diagrams (`assets/arctic/`, embedded in `research.html`) | **CC BY 4.0** | ARCTIC authors; see `assets/arctic/README.md` |
 
 - The MIT license covers the landing code and the opensiro mascot. Full text:

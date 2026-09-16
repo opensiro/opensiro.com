@@ -48,3 +48,15 @@ be relicensed under MIT or any other license).
 In short: if you copy, fork, or modify this landing and keep the Departure
 Mono font, credit "Departure Mono by Helena Zhang" and keep the OFL text in
 assets/DepartureMono-OFL.txt.
+
+Instrument Sans
+---------------
+The typeface "Instrument Sans" (assets/InstrumentSans-Regular.woff2) is:
+
+  Copyright 2022 The Instrument Sans Project Authors
+  https://github.com/Instrument/instrument-sans
+
+  Licensed under the SIL Open Font License, Version 1.1 (OFL-1.1).
+  Full text: assets/InstrumentSans-OFL.txt
+
+Copies that include the font must retain its copyright notice and OFL text.

@@ -51,3 +51,14 @@
 .design-logo-info a:hover{color:var(--accent-ink);border-color:var(--accent-ink)}
 @media(max-width:900px){.design-logo-grid{gap:12px}.design-logo-info{padding:20px}}
 @media(max-width:680px){.design-logo-grid{grid-template-columns:1fr}.design-logo-preview{height:230px}}
+
+.design-type-pairing{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);border:1px solid var(--hairline-2);border-top:0;background:var(--bg)}
+.design-pairing-example{padding:42px 40px;border-right:1px solid var(--hairline-2)}
+.design-pairing-kicker{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.design-pairing-example h3{margin:24px 0 14px;font-size:clamp(22px,3vw,32px);font-weight:400;letter-spacing:-.04em}
+.design-pairing-example p{max-width:450px;margin:0;font-family:var(--font-body);font-size:19px;line-height:1.5;color:#454844}
+.design-pairing-notes{align-self:center;padding:36px 40px}
+.design-pairing-notes p{margin:0 0 14px;line-height:1.7}
+.design-pairing-notes strong{font-weight:400;color:var(--ink)}
+.design-pairing-notes p a{border-bottom:1px solid var(--ink)}
+@media(max-width:680px){.design-type-pairing{grid-template-columns:1fr}.design-pairing-example{border-right:0;border-bottom:1px solid var(--hairline-2)}.design-pairing-example,.design-pairing-notes{padding:28px}.design-pairing-example p{font-size:17px}}
