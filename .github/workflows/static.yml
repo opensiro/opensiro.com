@@ -6,6 +6,11 @@ on:
   push:
     branches: ["main"]
 
+  # Keep the public index close to the canonical repository even when only
+  # opensiro/vsm-harness-index changes.
+  schedule:
+    - cron: "17 * * * *"
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -22,26 +27,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
+  # Single deploy job
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout site
         uses: actions/checkout@v4
+
+      - name: Checkout canonical VSM Harness Index
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-harness-index
+          ref: main
+          path: .upstream/vsm-harness-index
+
+      - name: Record canonical source revision
+        run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Sync VSM Index from canonical source
+        run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
+
       - name: Sync home Index preview
         run: node scripts/sync-index-preview.cjs
+
+      - name: Remove upstream checkout from deploy artifact
+        run: rm -rf .upstream
+
       - name: Check static pages and Index sync
-        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs
+        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs tests/vsm-index-source-sync.test.cjs
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
+          # Upload entire site after generated index synchronization.
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
