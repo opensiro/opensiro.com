@@ -133,6 +133,7 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
   if (meta.status !== 'included') continue;
   const id = meta.harness_id;
   if (!id) throw new Error(`Missing harness_id: ${file}`);
+  if (!catalogById.has(id)) throw new Error(`Included assessment is missing from catalog.psv: ${id}`);
   if (assessments.has(id)) throw new Error(`Duplicate included assessment for ${id}`);
   const states = stateInfo.map(([label, field, kind]) => {
     const state = meta[field];
@@ -148,12 +149,11 @@ for (const match of rankingText.matchAll(/^\|\s*(\d+)\s*\|\s*<a id="([^"]+)"><\/
 if (!rankingIds.length) throw new Error('No harness rows found in RANKINGS.md');
 if (new Set(rankingIds).size !== rankingIds.length) throw new Error('Duplicate harness id in RANKINGS.md');
 
-const missingAssessments = catalogRows.map((row) => row.harness_id).filter((id) => !assessments.has(id));
-if (missingAssessments.length) throw new Error(`Catalog entries missing included assessments: ${missingAssessments.join(', ')}`);
-const missingRankings = catalogRows.map((row) => row.harness_id).filter((id) => !rankingIds.includes(id));
-if (missingRankings.length) throw new Error(`Catalog entries missing from RANKINGS.md: ${missingRankings.join(', ')}`);
-const extraRankings = rankingIds.filter((id) => !catalogById.has(id));
-if (extraRankings.length) throw new Error(`RANKINGS.md entries missing from catalog.psv: ${extraRankings.join(', ')}`);
+const includedIds = [...assessments.keys()];
+const missingRankings = includedIds.filter((id) => !rankingIds.includes(id));
+if (missingRankings.length) throw new Error(`Included assessments missing from RANKINGS.md: ${missingRankings.join(', ')}`);
+const extraRankings = rankingIds.filter((id) => !assessments.has(id));
+if (extraRankings.length) throw new Error(`RANKINGS.md entries missing included assessments: ${extraRankings.join(', ')}`);
 
 const records = rankingIds.map((id) => {
   const catalog = catalogById.get(id);
@@ -219,9 +219,9 @@ if (checkOnly) {
     console.error(`VSM Index is stale against ${sourceRoot}. Run node scripts/sync-vsm-index.cjs --source ${sourceRoot}`);
     process.exitCode = 1;
   } else {
-    console.log(`VSM Index is current: ${records.length} harnesses from ${sourceRevision}.`);
+    console.log(`VSM Index is current: ${records.length} included harnesses from ${sourceRevision}.`);
   }
 } else {
   if (updated !== original) fs.writeFileSync(pagePath, updated);
-  console.log(`Synced VSM Index: ${records.length} harnesses from ${sourceRevision}.`);
+  console.log(`Synced VSM Index: ${records.length} included harnesses from ${sourceRevision}.`);
 }
