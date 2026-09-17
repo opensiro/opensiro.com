@@ -91,6 +91,8 @@ Departure Mono OFL notice because the outlined wordmark comes from that font.
 the bundled mascot PNG and uses outlined Departure Mono for the wordmark and
 pronunciation. Its editable-text source is `opensiro-nav-thin-source.svg`.
 
+The focused square variant (`logo/opensiro-square-focused.svg` and PNG sizes 256, 128, 64, and 32) uses a tighter square viewBox around the same pixel rectangles. The 32 px export has extra optical padding for small placements.
+
 The square logo also has a matching vector file:
 `logo/opensiro-square-256.svg` is copied from logo-factory `opensiro_ro.svg`,
 renamed to share the 1:1 PNG stem and sized to a 256 × 256 SVG viewport.

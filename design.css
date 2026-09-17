@@ -38,7 +38,7 @@
 @media(max-width:680px){.design-intro{padding:56px 0 64px}.design-intro-grid{grid-template-columns:1fr;gap:38px}.design-intro-copy h1{font-size:clamp(39px,10vw,60px)}.design-intro-art{min-height:340px}.design-intro-art img{width:118px}.design-section{padding:58px 0 66px}.design-section-heading{grid-template-columns:1fr;gap:14px;margin-bottom:30px}.design-assets{grid-template-columns:1fr}.design-asset+.design-asset{border-left:0;border-top:1px solid var(--hairline-2)}.design-asset{display:grid;grid-template-columns:42% 58%}.design-asset-preview{height:auto;min-height:230px;border-bottom:0;border-right:1px solid var(--hairline-2)}.design-asset-preview img{height:125px}.design-asset-preview.icon img{width:85px;height:85px}.design-type-panel{grid-template-columns:1fr}.design-type-sample{min-height:200px;border-right:0;border-bottom:1px solid var(--hairline-2)}.design-license-grid{grid-template-columns:1fr;gap:10px}}
 @media(max-width:420px){.design-asset{grid-template-columns:1fr}.design-asset-preview{height:210px;border-right:0;border-bottom:1px solid var(--hairline-2)}.design-asset-info{padding:22px}.design-type-sample,.design-type-details{padding:24px}}
 
-.design-logo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.design-logo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .design-logo-card{border:1px solid var(--hairline-2);min-width:0}
 .design-logo-preview{display:grid;place-items:center;height:245px;padding:28px;background:#f2f3f4;border-bottom:1px solid var(--hairline-2);overflow:hidden}
 .design-logo-preview.square img{width:158px;height:158px;image-rendering:pixelated}
@@ -46,6 +46,7 @@
 .design-logo-info{padding:24px}
 .design-logo-info>span{font-size:10px;letter-spacing:.1em;color:var(--muted)}
 .design-logo-info h3{font-size:19px;font-weight:normal;margin:18px 0 8px}
+.design-logo-info p{font-size:12px;line-height:1.5;color:var(--muted);margin:0}
 .design-logo-info>div{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px}
 .design-logo-info a{border-bottom:1px solid var(--ink);padding-bottom:5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .design-logo-info a:hover{color:var(--accent-ink);border-color:var(--accent-ink)}
