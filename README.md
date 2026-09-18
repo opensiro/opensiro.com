@@ -3,14 +3,6 @@
 Static multi-page site for **opensiro** — the company building the toolchain for
 organizations that compile, and the ARCTIC reasoning benchmark.
 
-## Working on OpenSiro?
-
-Repository-local website and presentation work stays here.
-
-For contributor roles, authority, escalation, cross-repository coordination, or organizational evolution across public OpenSiro projects, start at [`opensiro/vsm-oss-organization/CONTRIBUTOR_START.md`](https://github.com/opensiro/vsm-oss-organization/blob/main/CONTRIBUTOR_START.md).
-
-This repository is a presentation layer. Canonical VSM Harness facts remain in their owning Profile/Skills/Index repositories, and canonical ARCTIC artifacts remain in `opensiro/arctic-0`.
-
 The typography pairs Departure Mono with Instrument Sans. The design uses warm off-white backgrounds, sharp corners,
 hairline dividers, and pale blue artwork with darker blue link accents. The home page explains the
 work in plain language; each product has its own animated pixel mark.
