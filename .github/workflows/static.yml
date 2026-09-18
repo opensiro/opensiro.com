@@ -65,9 +65,13 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Keep reruns of the same workflow run unambiguous for deploy-pages.
+          name: github-pages-${{ github.run_attempt }}
           # Upload entire site after generated index synchronization.
           path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
