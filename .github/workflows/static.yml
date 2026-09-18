@@ -50,6 +50,9 @@ jobs:
       - name: Sync VSM Index from canonical source
         run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
 
+      - name: Sync VSM Index corpus metrics
+        run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
+
       - name: Sync home Index preview
         run: node scripts/sync-index-preview.cjs
 
@@ -57,7 +60,7 @@ jobs:
         run: rm -rf .upstream
 
       - name: Check static pages and Index sync
-        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs tests/vsm-index-source-sync.test.cjs
+        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs tests/vsm-index-source-sync.test.cjs tests/vsm-index-metrics-sync.test.cjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
