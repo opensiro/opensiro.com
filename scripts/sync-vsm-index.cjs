@@ -73,7 +73,7 @@ function sectionSummary(markdown, label, fallback) {
   }
   if (!paragraph.length) return fallback;
   return paragraph.join(' ')
-    .replace(/^`(?:A|C|P|\?|—)`:\s*/, '')
+    .replace(/^`(?:A(?:\(P\))?|C(?:\(P\))?|P|\?|—)`:\s*/, '')
     .replace(/\s+Confidence:\s*[^.]+\.?\s*$/i, '')
     .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
     .replace(/[*_`]/g, '')
@@ -97,20 +97,32 @@ const stateInfo = [
   ['S4', 'autonomy_s4', 'adaptation'],
   ['S5', 'autonomy_s5', 'identity']
 ];
-const stateClass = new Map([['A', 'state-a'], ['C', 'state-c'], ['P', 'state-p'], ['—', 'state-none'], ['?', 'state-unknown']]);
+const supportedStates = new Set(['A', 'A(P)', 'C', 'C(P)', 'P', '—', '?']);
+
+function stateBase(state) {
+  if (state === 'A(P)') return 'A';
+  if (state === 'C(P)') return 'C';
+  return state;
+}
+
+function stateCss(state) {
+  return new Map([['A', 'state-a'], ['C', 'state-c'], ['P', 'state-p'], ['—', 'state-none'], ['?', 'state-unknown']]).get(stateBase(state));
+}
 
 function fallbackSummary(state) {
   if (state === '?') return 'Insufficient reviewed primary evidence.';
   if (state === '—') return 'No material first-party path in the review boundary.';
   if (state === 'C') return 'First-party primitives exist, but the builder must compose the required authority or feedback loop.';
+  if (state === 'C(P)') return 'First-party primitives exist, with a parent-assisted path that can bind subsequent operation.';
   if (state === 'P') return 'Identity or ultimate-policy closure returns to a parent and binds subsequent operation.';
+  if (state === 'A(P)') return 'The agent owns the function in autonomous mode, with an available parent-assisted path that can bind subsequent operation.';
   return 'The agent holds the decision right and ready enactment exists in the standard setup.';
 }
 
 function stateAbbr(label, kind, state, summary, combo) {
-  const css = stateClass.get(state);
+  const css = stateCss(state);
   if (!css) throw new Error(`Unsupported state ${state} for ${label}`);
-  const comboClass = state === 'A' && combo ? ' combo-a' : '';
+  const comboClass = stateBase(state) === 'A' && combo ? ' combo-a' : '';
   return `<abbr tabindex="0" class="vhi-state ${css}${comboClass}" title="${escapeHtml(label)} / ${escapeHtml(kind)}: ${escapeHtml(summary)}">${escapeHtml(state)}</abbr>`;
 }
 
@@ -137,7 +149,7 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
   if (assessments.has(id)) throw new Error(`Duplicate included assessment for ${id}`);
   const states = stateInfo.map(([label, field, kind]) => {
     const state = meta[field];
-    if (!stateClass.has(state)) throw new Error(`Missing or invalid ${field} in ${file}`);
+    if (!supportedStates.has(state)) throw new Error(`Missing or invalid ${field} in ${file}`);
     return { label, kind, state, summary: sectionSummary(markdown, label, fallbackSummary(state)) };
   });
   assessments.set(id, { id, meta, states });
@@ -165,8 +177,8 @@ const records = rankingIds.map((id) => {
   const reviewedAt = meta.reviewed_at || catalog.pinned_at;
   const projectName = meta.project_name || catalog.project_name || id;
   const year = (catalog.repository_created_at || '').slice(0, 4) || '—';
-  const a = assessment.states.filter((item) => item.state === 'A').length;
-  const c = assessment.states.filter((item) => item.state === 'C').length;
+  const a = assessment.states.filter((item) => stateBase(item.state) === 'A').length;
+  const c = assessment.states.filter((item) => stateBase(item.state) === 'C').length;
   return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states };
 });
 
@@ -187,10 +199,10 @@ function renderTop(record, index) {
 
 function renderAll(record) {
   const combo = record.a >= 2;
-  const active = record.states.map((item, index) => item.state === 'A' ? index : -1).filter((index) => index >= 0);
+  const active = record.states.map((item, index) => stateBase(item.state) === 'A' ? index : -1).filter((index) => index >= 0);
   const stateCells = record.states.map((item, index) => {
     let lightning = '';
-    if (combo && item.state === 'A') {
+    if (combo && stateBase(item.state) === 'A') {
       const activeIndex = active.indexOf(index);
       if (activeIndex > 0) lightning = bolt.replace('GAP', String(index - active[activeIndex - 1]));
     }
