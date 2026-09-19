@@ -22,12 +22,33 @@ SOFTWARE.
 
 
 ================================================================
+SCOPE AND BRAND-ASSET EXCLUSION
+================================================================
+
+This MIT license applies to original source code and documentation in this
+repository except material that is explicitly covered by another license or by
+the brand-asset exclusion below.
+
+The opensiro name, wordmark, mascot, and official logo family identified in
+BRAND.md are brand assets. Those current brand assets are not licensed under
+this MIT license. Their original opensiro artwork is:
+
+  Copyright © 2026 opensiro. All rights reserved.
+
+See BRAND.md for the current brand-use policy and exact asset boundary.
+
+Earlier published revisions of this repository expressly included some mascot
+artwork under MIT. Nothing in this current license notice purports to revoke
+copyright permissions already granted for copies obtained under those earlier
+revisions.
+
+
+================================================================
 THIRD-PARTY ATTRIBUTION (REQUIRED WHEN COPYING OR MODIFYING)
 ================================================================
 
-This MIT license applies to the landing source code (HTML, CSS, JS) and the
-opensiro mascot artwork bundled in this repository. It does NOT cover the
-bundled typeface, which is governed by its own license below.
+The bundled typefaces and other separately identified third-party or adapted
+materials are governed by their own licenses.
 
 Departure Mono
 --------------
@@ -45,8 +66,8 @@ or adapts the font MUST retain the Departure Mono copyright notice and the
 OFL-1.1 license text, and MUST keep the font files under the OFL (they cannot
 be relicensed under MIT or any other license).
 
-In short: if you copy, fork, or modify this landing and keep the Departure
-Mono font, credit "Departure Mono by Helena Zhang" and keep the OFL text in
+In short: if you copy, fork, or modify this landing and keep the Departure Mono
+font, credit "Departure Mono by Helena Zhang" and keep the OFL text in
 assets/DepartureMono-OFL.txt.
 
 Instrument Sans

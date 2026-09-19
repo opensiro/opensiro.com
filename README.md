@@ -17,6 +17,7 @@ Runtime remains dependency-free. Regenerating the stabilized mascot GIF requires
 
 ```
 opensiro-web/
+├── BRAND.md        # opensiro mascot/logo/wordmark brand-use policy
 ├── index.html       # landing — hero, mission, products & research previews
 ├── design.html      # footer-only mascot/logo download and typeface credits
 ├── design.css       # design documentation page styles
@@ -43,12 +44,10 @@ opensiro-web/
 │   ├── mascot-logo.gif        # stabilized animated hero mascot
 │   ├── mascot-logo.png        # reduced-motion fallback + nav mascot
 │   ├── mascot-favicon.png     # alternate square mascot icon
-│   ├── opensiro-mascot-kit.zip # mascot files + MIT notice
-│   ├── opensiro-logo-kit.zip   # square, full, thin SVG logos + notices
-│   ├── logo/                  # logo-factory source and outlined variants
+│   ├── logo/                  # official opensiro logo sources and exports
 │   ├── favicon-64x64.png      # wider browser + touch icon
 │   ├── vsmlite-mark.svg      # animated parent/child mark
-│   ├── opensiro-mark.svg     # animated benchmark mark
+│   ├── opensiro-mark.svg     # animated opensiro mark; covered by BRAND.md
 │   ├── arctic-mark.svg       # animated reasoning-core mark
 │   ├── pixel-vine.png        # transparent climbing-vine sprite
 │   ├── arctic-mountains.png  # transparent mountain silhouette
@@ -100,7 +99,7 @@ opensiro-web/
   There is no fade, reset, or accumulating tangle. Offscreen sections
   are removed to keep the document bounded. Pause/Resume controls the garden;
   it also pauses offscreen and in hidden tabs. Reduced motion shows a completed
-  still ornament; without JavaScript only the original static vines remain.
+  still ornament; without JavaScript only the original static side vines remain.
 - Home and Products share the same hero layout. The garden keeps the visible
   branch recipes, growth position, and Pause state in per-tab session storage,
   including when returning through browser history. Only the visible sections
@@ -129,7 +128,7 @@ opensiro-web/
 | Route             | File            | Content                                   |
 |-------------------|-----------------|-------------------------------------------|
 | `/`               | `index.html`    | Hero, introduction, three-step approach, products & ARCTIC |
-| `/design.html`    | `design.html`   | mascot and logo downloads, typeface and licenses |
+| `/design.html`    | `design.html`   | mascot and logo downloads, brand policy, typeface and licenses |
 | `/products.html`  | `products.html` | vsmlite + opensiro detail blocks            |
 | `/vsm-index.html` | `vsm-index.html`| VSM Harness Index overview + source links |
 | `/research.html`  | `research.html` | ARCTIC detail + stats + CTA               |
@@ -186,17 +185,19 @@ the natural extraction points into a layout component.
 
 ## License & attribution
 
-The following licenses apply to this repository:
+The following licenses and use policies apply to this repository:
 
-| Component | License | Owner |
-|-----------|---------|-------|
-| Landing source (HTML, CSS, JS) + mascot artwork | **MIT** | © 2026 opensiro |
+| Component | License / policy | Owner |
+|-----------|------------------|-------|
+| Original site/tooling source and original documentation, except exclusions below | **MIT** | © 2026 opensiro |
+| opensiro mascot, official logo family, wordmark, favicons, and `assets/opensiro-mark.svg` | **Brand assets — see `BRAND.md`; not MIT in the current revision** | © 2026 opensiro |
 | `Departure Mono` typeface (`assets/DepartureMono-Regular.*`) | **SIL Open Font License 1.1 (OFL-1.1)** | © 2022–2024 Helena Zhang |
 | `Instrument Sans` typeface (`assets/InstrumentSans-Regular.woff2`) | **SIL Open Font License 1.1 (OFL-1.1)** | © 2022 The Instrument Sans Project Authors |
 | ARCTIC-0 training pairs and derived grid diagrams (`assets/arctic/`, embedded in `research.html`) | **CC BY 4.0** | ARCTIC authors; see `assets/arctic/README.md` |
 
-- The MIT license covers the landing code and the opensiro mascot. Full text:
-  [`LICENSE`](LICENSE).
+- The MIT license covers the open-source site/tooling code and original documentation except material explicitly excluded or separately licensed. Full text: [`LICENSE`](LICENSE).
+- The opensiro mascot, official logos, and wordmark follow [`BRAND.md`](BRAND.md).
+- Earlier repository revisions expressly placed some mascot artwork under MIT. `BRAND.md` records that historical grants are not revoked retroactively.
 - **Departure Mono** by Helena Zhang ([departuremono.com](https://departuremono.com))
   is licensed under the OFL-1.1. Full text:
   [`assets/DepartureMono-OFL.txt`](assets/DepartureMono-OFL.txt).
