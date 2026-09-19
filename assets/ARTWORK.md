@@ -5,8 +5,24 @@ The three product marks are small SVG assets with CSS animation and built-in
 forms: parent and child squares for vsmlite, comparison bars for opensiro, and
 a framed reasoning core for ARCTIC.
 
-The existing mascot and bundled font are preserved. See the repository README
-and `DepartureMono-OFL.txt` for credits and licensing.
+The existing mascot and bundled font are preserved. See the repository README,
+`BRAND.md`, and `DepartureMono-OFL.txt` for credits and licensing.
+
+## Brand boundary
+
+The current opensiro mascot, official logo family, favicons derived from the
+mascot/logo, and `opensiro-mark.svg` are opensiro brand assets. They are covered
+by the repository-level `BRAND.md` policy and are excluded from the current MIT
+license scope.
+
+This brand reservation does not automatically extend to every visual asset in
+this directory. Decorative artwork and other original site assets remain under
+the repository license unless they are separately identified, and third-party
+or adapted material keeps its stated upstream license.
+
+Earlier published repository revisions expressly included some mascot artwork
+under MIT. The current policy does not purport to revoke copyright permissions
+already granted for copies obtained under those earlier revisions.
 
 ## Generated assets
 
@@ -84,8 +100,8 @@ horizontal composition matching the site's navigation proportions.
 
 The public `opensiro-full.svg` and `opensiro-thin.svg` have Departure Mono text
 converted to paths, so they display correctly without a locally installed font.
-The two source SVGs retain editable text. The logo download kit includes the
-Departure Mono OFL notice because the outlined wordmark comes from that font.
+The two source SVGs retain editable text. Departure Mono remains governed by its
+OFL notice; the opensiro brand policy does not override third-party font rights.
 
 `logo/opensiro-nav-thin.svg` matches the live navigation more closely: it embeds
 the bundled mascot PNG and uses outlined Departure Mono for the wordmark and
