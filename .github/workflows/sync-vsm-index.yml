@@ -1,0 +1,94 @@
+name: Sync canonical VSM Index snapshot
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/sync-vsm-index.yml"
+  schedule:
+    # Once per day at 03:17 UTC. The offset avoids the busiest top-of-hour slot.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: "vsm-index-sync"
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Checkout canonical VSM Harness Index
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-harness-index
+          ref: main
+          path: .upstream/vsm-harness-index
+
+      - name: Record canonical source revision
+        run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Sync VSM Index from canonical source
+        run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
+
+      - name: Sync VSM Index corpus metrics
+        run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
+
+      - name: Sync home Index preview
+        run: node scripts/sync-index-preview.cjs
+
+      - name: Remove upstream checkout
+        run: rm -rf .upstream
+
+      - name: Check static pages and generated snapshot consistency
+        run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs tests/vsm-index-source-sync.test.cjs tests/vsm-index-metrics-sync.test.cjs
+
+      - name: Verify sync changed only materialized pages
+        shell: bash
+        run: |
+          changed="$(git diff --name-only)"
+          if [ -z "$changed" ]; then
+            echo "Canonical source produced no site changes."
+            exit 0
+          fi
+
+          echo "Changed files:"
+          printf '%s\n' "$changed"
+
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(index\.html|vsm-index\.html)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected generated files:" >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Commit changed snapshot
+        id: commit
+        shell: bash
+        run: |
+          git add index.html vsm-index.html
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync VSM Index snapshot"
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy changed snapshot
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run static.yml --ref main

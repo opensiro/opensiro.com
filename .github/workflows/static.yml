@@ -2,19 +2,16 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Human and integration pushes to the default branch deploy immediately.
   push:
     branches: ["main"]
 
-  # Keep the public index close to the canonical repository even when only
-  # opensiro/vsm-harness-index changes.
-  schedule:
-    - cron: "17 * * * *"
-
-  # Allows you to run this workflow manually from the Actions tab
+  # The daily canonical-source sync explicitly dispatches this workflow after
+  # committing a changed materialized snapshot. This is necessary because a
+  # push made with GITHUB_TOKEN does not itself trigger another workflow.
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages.
 permissions:
   contents: read
   pages: write
@@ -27,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job
+  # Deploy the materialized snapshot committed in opensiro.com.
   deploy:
     environment:
       name: github-pages
@@ -37,29 +34,7 @@ jobs:
       - name: Checkout site
         uses: actions/checkout@v4
 
-      - name: Checkout canonical VSM Harness Index
-        uses: actions/checkout@v4
-        with:
-          repository: opensiro/vsm-harness-index
-          ref: main
-          path: .upstream/vsm-harness-index
-
-      - name: Record canonical source revision
-        run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Sync VSM Index from canonical source
-        run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
-
-      - name: Sync VSM Index corpus metrics
-        run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
-
-      - name: Sync home Index preview
-        run: node scripts/sync-index-preview.cjs
-
-      - name: Remove upstream checkout from deploy artifact
-        run: rm -rf .upstream
-
-      - name: Check static pages and Index sync
+      - name: Check static pages and generated snapshot consistency
         run: node --test tests/static-site.test.cjs tests/index-preview-sync.test.cjs tests/vsm-index-source-sync.test.cjs tests/vsm-index-metrics-sync.test.cjs
 
       - name: Setup Pages
@@ -70,7 +45,6 @@ jobs:
         with:
           # Keep reruns of the same workflow run unambiguous for deploy-pages.
           name: github-pages-${{ github.run_attempt }}
-          # Upload entire site after generated index synchronization.
           path: '.'
 
       - name: Deploy to GitHub Pages
