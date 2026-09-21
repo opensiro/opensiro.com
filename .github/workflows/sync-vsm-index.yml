@@ -5,6 +5,13 @@ on:
     branches: ["main"]
     paths:
       - ".github/workflows/sync-vsm-index.yml"
+      - "scripts/sync-vsm-index.cjs"
+      - "scripts/sync-vsm-metrics.cjs"
+      - "scripts/sync-index-preview.cjs"
+      - "tests/static-site.test.cjs"
+      - "tests/index-preview-sync.test.cjs"
+      - "tests/vsm-index-source-sync.test.cjs"
+      - "tests/vsm-index-metrics-sync.test.cjs"
   schedule:
     # Once per day at 03:17 UTC. The offset avoids the busiest top-of-hour slot.
     - cron: "17 3 * * *"
