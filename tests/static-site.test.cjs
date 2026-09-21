@@ -61,13 +61,34 @@ for (const sourceFile of filesWithExtension('.css')) {
   while ((match = references.exec(source))) checkReference(match[1], sourceFile);
 }
 
-const runtimeFiles = [
-  ...filesWithExtension('.html'),
-  ...filesWithExtension('.js'),
-  ...filesWithExtension('.css')
-];
 const serverOnly = /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|navigator\.serviceWorker|type\s*=\s*["']module["']/i;
-for (const sourceFile of runtimeFiles) {
+
+function executableHtmlFragments(source) {
+  const fragments = [];
+  let match;
+
+  // Scan actual script elements, including attributes such as type="module".
+  // Generated prose, titles and data attributes are inert and must not be
+  // interpreted as JavaScript merely because they mention a runtime API.
+  const scripts = /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+  while ((match = scripts.exec(source))) fragments.push(match[0]);
+
+  // Inline event handlers are executable JavaScript too, so retain coverage
+  // for runtime-only APIs placed directly on HTML elements.
+  const handlers = /\bon[a-z][a-z\d:_-]*\s*=\s*(["'])([\s\S]*?)\1/gi;
+  while ((match = handlers.exec(source))) fragments.push(match[2]);
+
+  return fragments;
+}
+
+for (const sourceFile of filesWithExtension('.html')) {
+  const source = fs.readFileSync(sourceFile, 'utf8');
+  if (executableHtmlFragments(source).some((fragment) => serverOnly.test(fragment))) {
+    errors.push(`${path.relative(root, sourceFile)} contains a server/runtime-only dependency`);
+  }
+}
+
+for (const sourceFile of filesWithExtension('.js')) {
   const source = fs.readFileSync(sourceFile, 'utf8');
   if (serverOnly.test(source)) {
     errors.push(`${path.relative(root, sourceFile)} contains a server/runtime-only dependency`);
