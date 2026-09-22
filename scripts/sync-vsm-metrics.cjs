@@ -7,7 +7,8 @@ const root = path.resolve(__dirname, '..');
 const pagePath = path.join(root, 'vsm-index.html');
 const START = '<!-- VSM INDEX METRICS:START -->';
 const END = '<!-- VSM INDEX METRICS:END -->';
-const stylesheet = '<link rel="stylesheet" href="vsm-index-metrics.css?v=20260919-metrics">';
+const stylesheet = '<link rel="stylesheet" href="vsm-index-metrics.css?v=20260922-vsm-oss">';
+const stylesheetPattern = /<link rel="stylesheet" href="vsm-index-metrics\.css\?v=[^"]+">/;
 
 function argValue(name) {
   const index = process.argv.indexOf(name);
@@ -86,7 +87,9 @@ ${END}`;
 const original = requiredFile(pagePath);
 let updated = original;
 
-if (!updated.includes(stylesheet)) {
+if (stylesheetPattern.test(updated)) {
+  updated = updated.replace(stylesheetPattern, stylesheet);
+} else {
   if (!updated.includes('</head>')) throw new Error('Could not find </head> in vsm-index.html');
   updated = updated.replace('</head>', `${stylesheet}\n</head>`);
 }
