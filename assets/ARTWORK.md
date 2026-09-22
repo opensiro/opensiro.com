@@ -80,15 +80,17 @@ Reduced motion shows a completed still ornament and hides the pause control.
 
 ### `social-preview.png`
 
-Prompt: Landscape branded social-preview image for opensiro. Warm ivory
-#faf9f6 background. Refined sparse black monospace typesetting. Large exact
-text: "opensiro". Smaller exact text: "Build organizations. Test ideas."
-Delicate black pixel-grid ornaments in two corners, small blue #2f6df6 pixel
-accents. Lots of whitespace, sharp edges, minimalist retro software research
-brand. No additional text, no logos other than the specified wordmark,
-no gradients, no shadows, no rounded cards. Composition should read clearly
-when cropped or reduced as a social-preview thumbnail. Generate one landscape
-image, approximately 1536x1024.
+The shared social preview is rendered from `social-preview-source.html` with
+`../scripts/build-social-preview.cjs`. The source loads the bundled
+`DepartureMono-Regular.woff2` directly, placing text on the left and the
+original `mascot-logo.png` on the right. An inline SVG pattern repeats abstract
+VSM-inspired contours with smaller copies inside their operational units.
+Coordination, audit, control, adaptation and policy paths supply the visual
+vocabulary; this is decorative artwork, not a formal labelled VSM diagram.
+The selected composition uses contours at several scales to suggest depth.
+Muted blue routes connect the field. The output is a 1536x1024 PNG.
+Earlier grid and diagonal HTML compositions are kept in `../.archive/`.
+Rebuild with `node scripts/build-social-preview.cjs`.
 
 ## Logo downloads
 

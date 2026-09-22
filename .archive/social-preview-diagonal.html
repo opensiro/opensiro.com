@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1536, initial-scale=1">
+<title>opensiro · 02 / Diagonal field</title>
+<style>
+@font-face{font-family:DepartureMono;src:url("../assets/DepartureMono-Regular.woff2") format("woff2");font-weight:400;font-display:block}
+*{box-sizing:border-box}
+html,body{width:1536px;height:1024px;margin:0;overflow:hidden;background:#faf9f6}
+body{position:relative;color:#18181b;font-family:DepartureMono,monospace;font-synthesis:none}
+.network{position:absolute;inset:0;width:100%;height:100%}
+.foreground{position:absolute;inset:0;}
+.copy{position:absolute;left:112px;top:350px}
+h1{margin:0;font-size:143px;font-weight:400;line-height:1.1;letter-spacing:-.035em}
+p{margin:35px 0 0;font-size:44px;line-height:1.5;color:#535754}
+.mascot{position:absolute;width:352px;height:594px;object-fit:contain;right:146px;top:215px;image-rendering:pixelated}
+</style>
+</head>
+<body>
+<svg class="network" viewBox="0 0 1536 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+  <!-- An abstract VSM motif: three operations, coordination and audit paths,
+       current control, adaptation linked to environment, and policy above. -->
+  <g id="unit" stroke="currentColor" stroke-width="1.2">
+    <path d="M18 64H42M18 126H42M18 188H42M18 40V212
+             M120 64H145V38H185M120 126H145M120 188H145V126
+             M130 64V220H173V124M130 126H120M130 188H120
+             M198 28V16H232V78H212M198 48V78H184
+             M184 91H160V188H120M185 38H156V12H18V40"/>
+    <path d="M30 42H120V86H30ZM30 104H120V148H30ZM30 166H120V210H30Z"/>
+    <rect x="185" y="28" width="26" height="20"/>
+    <rect x="184" y="78" width="28" height="26"/>
+    <rect x="165" y="114" width="16" height="16"/>
+    <path d="M232 16V0M232 78H250M18 212V232"/>
+    <rect x="12" y="58" width="12" height="12" fill="currentColor" stroke="none"/>
+    <rect x="12" y="120" width="12" height="12" fill="currentColor" stroke="none"/>
+    <rect x="12" y="182" width="12" height="12" fill="currentColor" stroke="none"/>
+    <path d="M184 104V114M194 104V136H145"/>
+  </g>
+  <g id="recursive">
+    <use href="#unit"/>
+    <use href="#unit" transform="translate(36 46) scale(.16)"/>
+    <use href="#unit" transform="translate(77 46) scale(.16)"/>
+    <use href="#unit" transform="translate(36 108) scale(.16)"/>
+    <use href="#unit" transform="translate(77 108) scale(.16)"/>
+    <use href="#unit" transform="translate(36 170) scale(.16)"/>
+    <use href="#unit" transform="translate(77 170) scale(.16)"/>
+  </g>
+  <pattern id="organization" width="290" height="274" patternUnits="userSpaceOnUse">
+    <g color="#bec8c6">
+      <use href="#recursive" x="10" y="12"/>
+      <path d="M260 90H278V0M28 244V263H290M0 263H28" stroke="currentColor" stroke-width="1.2"/>
+    </g>
+  </pattern>
+  <radialGradient id="quiet">
+    <stop offset="0" stop-color="#faf9f6" stop-opacity=".84"/>
+    <stop offset=".6" stop-color="#faf9f6" stop-opacity=".68"/>
+    <stop offset="1" stop-color="#faf9f6" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<g transform="rotate(-17 768 512) translate(-52 -28)">
+  <rect x="-500" y="-500" width="2600" height="2100" fill="url(#organization)"/>
+  <g stroke="#9bafd2" stroke-width="2" opacity=".85">
+    <path d="M28 0V224H80V275H318V498H370V549H608V772H660V823H898V1046"/>
+    <path d="M1138 0V90H1112V286H1098V364H1072V560H1058V638H1032V834H1018V912H992V1100"/>
+  </g>
+  <g fill="#9bafd2">
+    <rect x="313" y="307" width="10" height="10"/>
+    <rect x="603" y="581" width="10" height="10"/>
+    <rect x="1067" y="359" width="10" height="10"/>
+    <rect x="1003" y="900" width="10" height="10"/>
+  </g>
+</g>
+<ellipse cx="452" cy="516" rx="575" ry="265" fill="url(#quiet)"/>
+<ellipse cx="1213" cy="512" rx="272" ry="328" fill="url(#quiet)" opacity=".6"/>
+</svg>
+<main class="foreground">
+  <div class="copy">
+    <h1>opensiro</h1>
+    <p>Build organizations.<br>Test ideas.</p>
+  </div>
+  <img class="mascot" src="../assets/mascot-logo.png" alt="opensiro mascot" width="320" height="540">
+</main>
+</body>
+</html>
