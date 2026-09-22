@@ -1,0 +1,133 @@
+name: Check VSM OSS metrics integration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/check-vsm-oss-metrics.yml"
+      - ".github/workflows/sync-vsm-index.yml"
+      - ".github/workflows/static.yml"
+      - "scripts/sync-vsm-index.cjs"
+      - "scripts/sync-vsm-metrics.cjs"
+      - "scripts/sync-vsm-oss-metrics.cjs"
+      - "scripts/sync-index-preview.cjs"
+      - "vsm-index-metrics.css"
+      - "tests/static-site.test.cjs"
+      - "tests/index-preview-sync.test.cjs"
+      - "tests/vsm-index-source-sync.test.cjs"
+      - "tests/vsm-index-metrics-sync.test.cjs"
+      - "tests/vsm-oss-metrics-sync.test.cjs"
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site PR
+        uses: actions/checkout@v4
+
+      - name: Checkout canonical VSM Harness Index
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-harness-index
+          ref: main
+          path: .upstream/vsm-harness-index
+          fetch-depth: 0
+
+      - name: Checkout VSM OSS Organization metrics contract
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-oss-organization
+          ref: main
+          path: .upstream/vsm-oss-organization
+          fetch-depth: 0
+
+      - name: Checkout VSM Harness Profile
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-harness-profile
+          ref: main
+          path: .upstream/vsm-harness-profile
+          fetch-depth: 0
+
+      - name: Checkout VSM Harness Skills
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/vsm-harness-skills
+          ref: main
+          path: .upstream/vsm-harness-skills
+          fetch-depth: 0
+
+      - name: Checkout Awesome VSM Harness
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/awesome-vsm-harness
+          ref: main
+          path: .upstream/awesome-vsm-harness
+          fetch-depth: 0
+
+      - name: Record canonical Index revision
+        run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install canonical collector dependency
+        run: python -m pip install -r .upstream/vsm-oss-organization/requirements-metrics.txt
+
+      - name: Materialize canonical Index locally
+        run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
+
+      - name: Materialize canonical Index corpus metrics locally
+        run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
+
+      - name: Collect canonical public VSM OSS snapshot
+        run: >-
+          python .upstream/vsm-oss-organization/scripts/collect_public_metrics.py
+          --profile-root .upstream/vsm-harness-profile
+          --skills-root .upstream/vsm-harness-skills
+          --index-root .upstream/vsm-harness-index
+          --awesome-root .upstream/awesome-vsm-harness
+          --organization-root .upstream/vsm-oss-organization
+          --output .upstream/vsm-oss-metrics.json
+
+      - name: Finalize canonical historical windows
+        run: >-
+          python .upstream/vsm-oss-organization/scripts/finalize_public_metrics_windows.py
+          --snapshot .upstream/vsm-oss-metrics.json
+          --skills-root .upstream/vsm-harness-skills
+          --index-root .upstream/vsm-harness-index
+          --awesome-root .upstream/awesome-vsm-harness
+
+      - name: Render VSM OSS activity block locally
+        run: node scripts/sync-vsm-oss-metrics.cjs --source .upstream/vsm-oss-metrics.json
+
+      - name: Materialize home Index preview locally
+        run: node scripts/sync-index-preview.cjs
+
+      - name: Remove upstream checkouts
+        run: rm -rf .upstream
+
+      - name: Run static and renderer tests
+        run: >-
+          node --test
+          tests/static-site.test.cjs
+          tests/index-preview-sync.test.cjs
+          tests/vsm-index-source-sync.test.cjs
+          tests/vsm-index-metrics-sync.test.cjs
+          tests/vsm-oss-metrics-sync.test.cjs
+
+      - name: Verify integration only materializes public pages
+        shell: bash
+        run: |
+          changed="$(git diff --name-only)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(index\.html|vsm-index\.html)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected integration changes:" >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+          echo "Read-only integration materialized only expected public pages."
