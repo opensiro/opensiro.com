@@ -41,7 +41,7 @@ test('VSM index renders corpus metrics from canonical metrics.json', () => {
     assert.equal(run('--check').status, 1);
     assert.equal(run().status, 0);
     const page = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
-    assert.match(page, /vsm-index-metrics\.css\?v=20260919-metrics/);
+    assert.match(page, /vsm-index-metrics\.css\?v=20260922-vsm-oss/);
     assert.match(page, /<h2 id="vhi-metrics-title">Corpus snapshot<\/h2>/);
     assert.match(page, /<dt>Included<\/dt><dd>128<\/dd>/);
     assert.match(page, /<dt>Catalog<\/dt><dd>129<\/dd>/);

@@ -1,10 +1,11 @@
-name: Sync canonical VSM Index snapshot
+name: Check VSM OSS metrics integration
 
 on:
-  push:
-    branches: ["main"]
+  pull_request:
     paths:
+      - ".github/workflows/check-vsm-oss-metrics.yml"
       - ".github/workflows/sync-vsm-index.yml"
+      - ".github/workflows/static.yml"
       - "scripts/sync-vsm-index.cjs"
       - "scripts/sync-vsm-metrics.cjs"
       - "scripts/sync-vsm-oss-metrics.cjs"
@@ -15,27 +16,16 @@ on:
       - "tests/vsm-index-source-sync.test.cjs"
       - "tests/vsm-index-metrics-sync.test.cjs"
       - "tests/vsm-oss-metrics-sync.test.cjs"
-  schedule:
-    # Once per day at 03:17 UTC. The offset avoids the busiest top-of-hour slot.
-    - cron: "17 3 * * *"
-  workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
-
-concurrency:
-  group: "vsm-index-sync"
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  sync:
+  integration:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout site main
+      - name: Checkout site PR
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Checkout canonical VSM Harness Index
         uses: actions/checkout@v4
@@ -77,21 +67,21 @@ jobs:
           path: .upstream/awesome-vsm-harness
           fetch-depth: 0
 
-      - name: Record canonical source revision
+      - name: Record canonical Index revision
         run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Set up Python for canonical VSM OSS collector
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install VSM OSS collector dependency
+      - name: Install canonical collector dependency
         run: python -m pip install -r .upstream/vsm-oss-organization/requirements-metrics.txt
 
-      - name: Sync VSM Index from canonical source
+      - name: Materialize canonical Index locally
         run: node scripts/sync-vsm-index.cjs --source .upstream/vsm-harness-index
 
-      - name: Sync VSM Index corpus metrics
+      - name: Materialize canonical Index corpus metrics locally
         run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
 
       - name: Collect canonical public VSM OSS snapshot
@@ -104,7 +94,7 @@ jobs:
           --organization-root .upstream/vsm-oss-organization
           --output .upstream/vsm-oss-metrics.json
 
-      - name: Finalize VSM OSS historical windows
+      - name: Finalize canonical historical windows
         run: >-
           python .upstream/vsm-oss-organization/scripts/finalize_public_metrics_windows.py
           --snapshot .upstream/vsm-oss-metrics.json
@@ -112,16 +102,16 @@ jobs:
           --index-root .upstream/vsm-harness-index
           --awesome-root .upstream/awesome-vsm-harness
 
-      - name: Render VSM OSS activity block
+      - name: Render VSM OSS activity block locally
         run: node scripts/sync-vsm-oss-metrics.cjs --source .upstream/vsm-oss-metrics.json
 
-      - name: Sync home Index preview
+      - name: Materialize home Index preview locally
         run: node scripts/sync-index-preview.cjs
 
-      - name: Remove upstream checkout
+      - name: Remove upstream checkouts
         run: rm -rf .upstream
 
-      - name: Check static pages and generated snapshot consistency
+      - name: Run static and renderer tests
         run: >-
           node --test
           tests/static-site.test.cjs
@@ -130,43 +120,14 @@ jobs:
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
 
-      - name: Verify sync changed only materialized pages
+      - name: Verify integration only materializes public pages
         shell: bash
         run: |
           changed="$(git diff --name-only)"
-          if [ -z "$changed" ]; then
-            echo "Canonical source produced no site changes."
-            exit 0
-          fi
-
-          echo "Changed files:"
-          printf '%s\n' "$changed"
-
           unexpected="$(printf '%s\n' "$changed" | grep -vE '^(index\.html|vsm-index\.html)$' || true)"
           if [ -n "$unexpected" ]; then
-            echo "Unexpected generated files:" >&2
+            echo "Unexpected integration changes:" >&2
             printf '%s\n' "$unexpected" >&2
             exit 1
           fi
-
-      - name: Commit changed snapshot
-        id: commit
-        shell: bash
-        run: |
-          git add index.html vsm-index.html
-          if git diff --cached --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: sync VSM public snapshot"
-          git push origin HEAD:main
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy changed snapshot
-        if: steps.commit.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run static.yml --ref main
+          echo "Read-only integration materialized only expected public pages."
