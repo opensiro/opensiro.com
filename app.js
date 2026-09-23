@@ -26,11 +26,12 @@
   })();
 
   /* ----------------------------------------- compact harness source labels
-     Harness names come from the generated Index snapshot. The source is
-     derived from each canonical GitHub repository link so this presentation
-     layer never maintains a second name-to-repository mapping. */
+     Harness links come from the generated Index snapshot. Display the
+     canonical GitHub owner/repo path directly; when it exceeds the compact
+     table budget, preserve the repository end and elide from the left. */
   (function addHarnessSources() {
     var maxLabelLength = 40;
+    var ellipsis = '...';
     var selector = [
       '.vhi-combos tbody th[scope="row"] > a',
       '.vhi-all tbody th[scope="row"] > a',
@@ -49,11 +50,12 @@
       var parts = url.pathname.split('/').filter(Boolean);
       if (parts.length < 2) return;
       var source = parts[0] + '/' + parts[1];
-      var name = link.textContent.trim();
-      var combined = name + ' · ' + source;
+      var visibleSource = source.length <= maxLabelLength
+        ? source
+        : ellipsis + source.slice(-(maxLabelLength - ellipsis.length));
 
       link.title = 'Source repository: ' + source;
-      if (combined.length <= maxLabelLength) link.textContent = combined;
+      link.textContent = visibleSource;
     });
   })();
 
