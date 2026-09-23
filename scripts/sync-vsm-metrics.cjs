@@ -39,6 +39,19 @@ function requireNumber(value, label) {
   return value;
 }
 
+function formatUpdatedAt(value) {
+  const raw = String(value || '').trim();
+  if (!raw) throw new Error('Missing canonical Index update time');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return { datetime: raw, label: raw };
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) throw new Error(`Invalid canonical Index update time: ${raw}`);
+  const iso = parsed.toISOString();
+  return {
+    datetime: iso,
+    label: `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`
+  };
+}
+
 const metricsPath = path.join(sourceRoot, 'data', 'metrics.json');
 let metrics;
 try {
@@ -57,6 +70,7 @@ const contract = metrics.active_contract || {};
 if (!contract.profile_version || !contract.methodology_version) throw new Error('Missing active semantic contract in data/metrics.json');
 if (!Array.isArray(metrics.milestones)) throw new Error('Missing milestones in data/metrics.json');
 
+const updatedAt = formatUpdatedAt(process.env.VSM_INDEX_SOURCE_UPDATED_AT || metrics.snapshot_date);
 const next = metrics.milestones.find((row) => row && row.status === 'next');
 if (!next) throw new Error('Missing next corpus milestone in data/metrics.json');
 const nextTarget = requireNumber(next.target, 'milestones.next.target');
@@ -67,7 +81,7 @@ const progress = Math.min(progressFraction * 100, 100);
 const section = `${START}
   <section class="vhi-metrics" aria-labelledby="vhi-metrics-title">
     <header class="vhi-metrics-head">
-      <div><h2 id="vhi-metrics-title">Corpus snapshot</h2><p>Generated from the canonical VSM Harness Index.</p></div>
+      <div><h2 id="vhi-metrics-title">Corpus snapshot</h2><p>Generated from the canonical VSM Harness Index.</p><p class="vhi-metrics-updated">Last updated <time datetime="${escapeHtml(updatedAt.datetime)}">${escapeHtml(updatedAt.label)}</time></p></div>
       <a href="https://github.com/opensiro/vsm-harness-index/blob/main/METRICS.md" target="_blank" rel="noopener">Full metrics &#8599;</a>
     </header>
     <dl class="vhi-metric-grid">
