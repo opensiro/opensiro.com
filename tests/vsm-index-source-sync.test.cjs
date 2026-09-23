@@ -16,6 +16,12 @@ function assessment(id, name, states) {
   return `---\nharness_id: ${id}\nproject_name: ${name}\nrepository: https://github.com/test-fixture/${id}\nreview_ref: ${id.repeat(16).slice(0, 16)}\nreviewed_at: 2026-09-16\nstatus: included\n${fields.map((field, i) => `${field}: ${states[i]}`).join('\n')}\n---\n\n${labels.map((label, i) => `## ${label} — Section\n\`${states[i]}\`: ${name} ${label} evidence. Confidence: high.`).join('\n\n')}\n`;
 }
 
+function git(source, ...args) {
+  const result = spawnSync('git', ['-C', source, ...args], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  return result.stdout.trim();
+}
+
 test('VSM index renders included assessments from canonical source inputs', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'opensiro-vsm-'));
   const source = path.join(dir, '.upstream', 'vsm-harness-index');
@@ -26,6 +32,20 @@ test('VSM index renders included assessments from canonical source inputs', () =
   put(path.join(source, 'RANKINGS.md'), '| Rank | Harness |\n| ---: | --- |\n| 1 | <a id="beta"></a>[Beta](x) |\n| 2 | <a id="alpha"></a>[Alpha](x) |\n');
   put(path.join(source, 'assessments', 'alpha.md'), assessment('alpha', 'Alpha', ['A', '—', '—', 'A', '—', '—']));
   put(path.join(source, 'assessments', 'beta.md'), assessment('beta', 'Beta', ['A', 'A(P)', 'C(P)', 'P', '—', '?']));
+
+  fs.mkdirSync(source, { recursive: true });
+  git(source, 'init', '-q');
+  git(source, 'config', 'user.name', 'Fixture');
+  git(source, 'config', 'user.email', 'fixture@example.com');
+  git(source, 'add', '.');
+  git(source, 'commit', '-qm', 'add assessments');
+  const alphaRef = git(source, 'rev-parse', 'HEAD');
+  fs.appendFileSync(path.join(source, 'assessments', 'beta.md'), '\n<!-- beta revision -->\n');
+  git(source, 'add', 'assessments/beta.md');
+  git(source, 'commit', '-qm', 'revise beta assessment');
+  const betaRef = git(source, 'rev-parse', 'HEAD');
+  assert.notEqual(alphaRef, betaRef);
+
   const run = (...args) => spawnSync(process.execPath, [script, '--source', source, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, VSM_INDEX_SOURCE_REF: 'fixture-sha' } });
   try {
     assert.equal(run('--check').status, 1);
@@ -42,8 +62,9 @@ test('VSM index renders included assessments from canonical source inputs', () =
     assert.match(page, /class="vhi-state state-c" title="S3 \/ regulation: Beta S3 evidence\.">C\(P\)<\/abbr>/);
     assert.match(page, /class="vhi-state state-p" title="S3\* \/ direct audit: Beta S3 evidence\.">P<\/abbr>/);
     assert.equal((page.match(/>Assessment ref<\/th>/g) || []).length, 2);
-    assert.match(page, /href="https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/fixture-sha\/assessments\/beta\.md"[^>]*>fixture &#8599;<\/a>/);
-    assert.match(page, /href="https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/fixture-sha\/assessments\/alpha\.md"[^>]*>fixture &#8599;<\/a>/);
+    assert.match(page, new RegExp(`href="https://github\\.com/opensiro/vsm-harness-index/blob/${betaRef}/assessments/beta\\.md"[^>]*>${betaRef.slice(0, 7)} &#8599;</a>`));
+    assert.match(page, new RegExp(`href="https://github\\.com/opensiro/vsm-harness-index/blob/${alphaRef}/assessments/alpha\\.md"[^>]*>${alphaRef.slice(0, 7)} &#8599;</a>`));
+    assert.doesNotMatch(page, />fixture &#8599;<\/a>/, 'global Index snapshot ref must not be reused as the assessment ref');
     assert.equal((page.match(/class="assessment-ref"/g) || []).length, 4);
     assert.equal(run('--check').status, 0);
   } finally {
