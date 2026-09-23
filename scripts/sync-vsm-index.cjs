@@ -2,6 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const pagePath = path.join(root, 'vsm-index.html');
@@ -56,6 +57,27 @@ function listMarkdownFiles(dir) {
     else if (entry.isFile() && entry.name.endsWith('.md')) out.push(full);
   }
   return out;
+}
+
+function assessmentRefsByPath() {
+  let history;
+  try {
+    history = execFileSync('git', ['-C', sourceRoot, 'log', '--format=@@%H', '--name-only', '--', 'assessments'], { encoding: 'utf8' });
+  } catch (error) {
+    throw new Error(`Could not read assessment history from ${sourceRoot}: ${error.message}`);
+  }
+  const refs = new Map();
+  let commit = null;
+  for (const rawLine of history.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    if (line.startsWith('@@')) {
+      commit = line.slice(2);
+      continue;
+    }
+    if (commit && line.startsWith('assessments/') && line.endsWith('.md') && !refs.has(line)) refs.set(line, commit);
+  }
+  return refs;
 }
 
 function sectionSummary(markdown, label, fallback) {
@@ -137,6 +159,7 @@ const catalogRows = parsePsv(requiredFile(path.join(sourceRoot, 'data', 'catalog
 const catalogById = new Map(catalogRows.map((row) => [row.harness_id, row]));
 if (catalogById.size !== catalogRows.length) throw new Error('Duplicate harness_id in catalog.psv');
 
+const assessmentRefs = assessmentRefsByPath();
 const assessmentsDir = path.join(sourceRoot, 'assessments');
 if (!fs.existsSync(assessmentsDir)) throw new Error(`Missing assessments directory: ${assessmentsDir}`);
 const assessments = new Map();
@@ -154,7 +177,9 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
     return { label, kind, state, summary: sectionSummary(markdown, label, fallbackSummary(state)) };
   });
   const assessmentPath = path.relative(sourceRoot, file).split(path.sep).join('/');
-  assessments.set(id, { id, meta, states, assessmentPath });
+  const assessmentRef = assessmentRefs.get(assessmentPath);
+  if (!assessmentRef) throw new Error(`Missing Git history for included assessment: ${assessmentPath}`);
+  assessments.set(id, { id, meta, states, assessmentPath, assessmentRef });
 }
 
 const rankingText = requiredFile(path.join(sourceRoot, 'RANKINGS.md'));
@@ -181,7 +206,7 @@ const records = rankingIds.map((id) => {
   const year = (catalog.repository_created_at || '').slice(0, 4) || '—';
   const a = assessment.states.filter((item) => stateBase(item.state) === 'A').length;
   const c = assessment.states.filter((item) => stateBase(item.state) === 'C').length;
-  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath };
+  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath, assessmentRef: assessment.assessmentRef };
 });
 
 function recordLink(record) {
@@ -194,8 +219,8 @@ function reviewLink(record) {
 }
 
 function assessmentLink(record) {
-  const href = `${sourceRepository}/blob/${encodeURIComponent(sourceRevision)}/${record.assessmentPath.split('/').map(encodeURIComponent).join('/')}`;
-  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" title="Open assessment at VSM Index revision ${escapeHtml(sourceRevision)}">${escapeHtml(sourceRevision.slice(0, 7))} &#8599;</a>`;
+  const href = `${sourceRepository}/blob/${encodeURIComponent(record.assessmentRef)}/${record.assessmentPath.split('/').map(encodeURIComponent).join('/')}`;
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" title="Open assessment at commit ${escapeHtml(record.assessmentRef)}">${escapeHtml(record.assessmentRef.slice(0, 7))} &#8599;</a>`;
 }
 
 function renderTop(record, index) {
