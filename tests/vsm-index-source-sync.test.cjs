@@ -21,7 +21,7 @@ test('VSM index renders included assessments from canonical source inputs', () =
   const source = path.join(dir, '.upstream', 'vsm-harness-index');
   const script = path.join(dir, 'scripts', 'sync-vsm-index.cjs');
   put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-index.cjs'), 'utf8'));
-  put(path.join(dir, 'vsm-index.html'), '<meta name="description" content="Track 1 evidence-backed agent harness fingerprints across six Viable System Model functions."><main id="main-content"><section class="vhi-combos"><tbody><tr><td>old</td></tr></tbody></section><section class="vhi-all"><tbody><tr><td>old</td></tr></tbody></section></main>');
+  put(path.join(dir, 'vsm-index.html'), '<meta name="description" content="Track 1 evidence-backed agent harness fingerprints across six Viable System Model functions."><main id="main-content"><section class="vhi-combos"><table><thead><tr><th scope="col">Harness</th></tr></thead><tbody><tr><td>old</td></tr></tbody></table></section><section class="vhi-all"><table><thead><tr><th scope="col">Harness</th></tr></thead><tbody><tr><td>old</td></tr></tbody></table></section></main>');
   put(path.join(source, 'data', 'catalog.psv'), 'catalog_position|harness_id|project_name|repository|repository_created_at|source_membership|review_ref|pinned_at\n1|alpha|Alpha|https://github.com/test-fixture/alpha|2024-01-01T00:00:00Z|fixture|aaaaaaaaaaaaaaaa|2026-09-16\n2|beta|Beta|https://github.com/test-fixture/beta|2026-01-01T00:00:00Z|fixture|bbbbbbbbbbbbbbbb|2026-09-16\n3|gamma|Gamma|https://github.com/test-fixture/gamma|2026-02-01T00:00:00Z|fixture|cccccccccccccccc|2026-09-16\n');
   put(path.join(source, 'RANKINGS.md'), '| Rank | Harness |\n| ---: | --- |\n| 1 | <a id="beta"></a>[Beta](x) |\n| 2 | <a id="alpha"></a>[Alpha](x) |\n');
   put(path.join(source, 'assessments', 'alpha.md'), assessment('alpha', 'Alpha', ['A', '—', '—', 'A', '—', '—']));
@@ -41,6 +41,10 @@ test('VSM index renders included assessments from canonical source inputs', () =
     assert.match(page, /class="vhi-state state-a combo-a" title="S2 \/ coordination: Beta S2 evidence\.">A\(P\)<\/abbr>/);
     assert.match(page, /class="vhi-state state-c" title="S3 \/ regulation: Beta S3 evidence\.">C\(P\)<\/abbr>/);
     assert.match(page, /class="vhi-state state-p" title="S3\* \/ direct audit: Beta S3 evidence\.">P<\/abbr>/);
+    assert.equal((page.match(/>Assessment ref<\/th>/g) || []).length, 2);
+    assert.match(page, /href="https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/fixture-sha\/assessments\/beta\.md"[^>]*>fixture &#8599;<\/a>/);
+    assert.match(page, /href="https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/fixture-sha\/assessments\/alpha\.md"[^>]*>fixture &#8599;<\/a>/);
+    assert.equal((page.match(/class="assessment-ref"/g) || []).length, 4);
     assert.equal(run('--check').status, 0);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
