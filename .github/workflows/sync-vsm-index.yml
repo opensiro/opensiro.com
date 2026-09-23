@@ -77,8 +77,11 @@ jobs:
           path: .upstream/awesome-vsm-harness
           fetch-depth: 0
 
-      - name: Record canonical source revision
-        run: echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Record canonical source revision and freshness
+        shell: bash
+        run: |
+          echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "VSM_INDEX_SOURCE_UPDATED_AT=$(git -C .upstream/vsm-harness-index show -s --format=%cI HEAD)" >> "$GITHUB_ENV"
 
       - name: Set up Python for canonical VSM OSS collector
         uses: actions/setup-python@v5
