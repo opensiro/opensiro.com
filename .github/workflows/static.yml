@@ -38,6 +38,7 @@ jobs:
         run: >-
           node --test
           tests/static-site.test.cjs
+          tests/harness-source-labels.test.cjs
           tests/index-preview-sync.test.cjs
           tests/vsm-index-source-sync.test.cjs
           tests/vsm-index-metrics-sync.test.cjs
