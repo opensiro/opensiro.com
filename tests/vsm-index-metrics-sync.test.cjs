@@ -18,6 +18,7 @@ test('VSM index renders corpus metrics from canonical metrics.json', () => {
   put(path.join(dir, 'vsm-index.html'), '<!doctype html><html><head></head><body><main><section class="vhi-combos"><p>table</p></section></main></body></html>');
   put(path.join(source, 'data', 'metrics.json'), JSON.stringify({
     schema_version: 1,
+    snapshot_date: '2026-09-23',
     corpus: {
       included_assessments: 128,
       canonical_assessments: 129,
@@ -36,13 +37,18 @@ test('VSM index renders corpus metrics from canonical metrics.json', () => {
     ]
   }, null, 2));
 
-  const run = (...args) => spawnSync(process.execPath, [script, '--source', source, ...args], { cwd: dir, encoding: 'utf8' });
+  const run = (...args) => spawnSync(process.execPath, [script, '--source', source, ...args], {
+    cwd: dir,
+    encoding: 'utf8',
+    env: { ...process.env, VSM_INDEX_SOURCE_UPDATED_AT: '2026-09-23T12:01:22Z' }
+  });
   try {
     assert.equal(run('--check').status, 1);
     assert.equal(run().status, 0);
     const page = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
     assert.match(page, /vsm-index-metrics\.css\?v=20260922-vsm-oss/);
     assert.match(page, /<h2 id="vhi-metrics-title">Corpus snapshot<\/h2>/);
+    assert.match(page, /Last updated <time datetime="2026-09-23T12:01:22\.000Z">2026-09-23 12:01 UTC<\/time>/);
     assert.match(page, /<dt>Included<\/dt><dd>128<\/dd>/);
     assert.match(page, /<dt>Catalog<\/dt><dd>129<\/dd>/);
     assert.match(page, /<dt>Reassessments<\/dt><dd>80<\/dd>/);
@@ -51,6 +57,31 @@ test('VSM index renders corpus metrics from canonical metrics.json', () => {
     assert.match(page, /Profile 0\.2\.3 \/ Methodology 0\.3\.5/);
     assert.ok(page.indexOf('Corpus snapshot') < page.indexOf('class="vhi-combos"'));
     assert.equal(run('--check').status, 0);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('VSM index falls back to snapshot_date when source commit time is unavailable', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'opensiro-vsm-metrics-date-'));
+  const source = path.join(dir, '.upstream', 'vsm-harness-index');
+  const script = path.join(dir, 'scripts', 'sync-vsm-metrics.cjs');
+  put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-metrics.cjs'), 'utf8'));
+  put(path.join(dir, 'vsm-index.html'), '<!doctype html><html><head></head><body><main><section class="vhi-combos"><p>table</p></section></main></body></html>');
+  put(path.join(source, 'data', 'metrics.json'), JSON.stringify({
+    schema_version: 1,
+    snapshot_date: '2026-09-23',
+    corpus: { included_assessments: 1, catalog_entries: 1, reassessment_events: 0, full_a_assessments: 0 },
+    active_contract: { profile_version: '0.2.4', methodology_version: '0.3.6' },
+    milestones: [{ target: 100, status: 'next', completed: 1, progress_fraction: 0.01 }]
+  }));
+  const env = { ...process.env };
+  delete env.VSM_INDEX_SOURCE_UPDATED_AT;
+  const run = spawnSync(process.execPath, [script, '--source', source], { cwd: dir, encoding: 'utf8', env });
+  try {
+    assert.equal(run.status, 0);
+    const page = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
+    assert.match(page, /Last updated <time datetime="2026-09-23">2026-09-23<\/time>/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
