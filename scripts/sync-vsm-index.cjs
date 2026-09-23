@@ -14,6 +14,7 @@ function argValue(name) {
 const sourceRoot = path.resolve(root, argValue('--source') || process.env.VSM_INDEX_SOURCE || '.upstream/vsm-harness-index');
 const checkOnly = process.argv.includes('--check');
 const sourceRevision = process.env.VSM_INDEX_SOURCE_REF || 'main';
+const sourceRepository = 'https://github.com/opensiro/vsm-harness-index';
 
 function requiredFile(file) {
   if (!fs.existsSync(file)) throw new Error(`Missing required source file: ${file}`);
@@ -152,7 +153,8 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
     if (!supportedStates.has(state)) throw new Error(`Missing or invalid ${field} in ${file}`);
     return { label, kind, state, summary: sectionSummary(markdown, label, fallbackSummary(state)) };
   });
-  assessments.set(id, { id, meta, states });
+  const assessmentPath = path.relative(sourceRoot, file).split(path.sep).join('/');
+  assessments.set(id, { id, meta, states, assessmentPath });
 }
 
 const rankingText = requiredFile(path.join(sourceRoot, 'RANKINGS.md'));
@@ -179,7 +181,7 @@ const records = rankingIds.map((id) => {
   const year = (catalog.repository_created_at || '').slice(0, 4) || '—';
   const a = assessment.states.filter((item) => stateBase(item.state) === 'A').length;
   const c = assessment.states.filter((item) => stateBase(item.state) === 'C').length;
-  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states };
+  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath };
 });
 
 function recordLink(record) {
@@ -191,10 +193,15 @@ function reviewLink(record) {
   return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" title="Open pinned source revision ${escapeHtml(record.reviewRef)}">${escapeHtml(record.reviewRef.slice(0, 7))} &#8599;</a>`;
 }
 
+function assessmentLink(record) {
+  const href = `${sourceRepository}/blob/${encodeURIComponent(sourceRevision)}/${record.assessmentPath.split('/').map(encodeURIComponent).join('/')}`;
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" title="Open assessment at VSM Index revision ${escapeHtml(sourceRevision)}">${escapeHtml(sourceRevision.slice(0, 7))} &#8599;</a>`;
+}
+
 function renderTop(record, index) {
   const combo = record.a >= 2;
   const pattern = record.states.map((item) => stateAbbr(item.label, item.kind, item.state, item.summary, combo)).join('');
-  return `<tr data-a="${record.a}" data-c="${record.c}"><th scope="row"><span class="vhi-rank">${String(index + 1).padStart(2, '0')}</span>${recordLink(record)}</th><td data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td><div class="combo-pattern" aria-label="VSM state pattern">${pattern}</div></td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td></tr>`;
+  return `<tr data-a="${record.a}" data-c="${record.c}"><th scope="row"><span class="vhi-rank">${String(index + 1).padStart(2, '0')}</span>${recordLink(record)}</th><td data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td><div class="combo-pattern" aria-label="VSM state pattern">${pattern}</div></td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td><td class="assessment-ref">${assessmentLink(record)}</td></tr>`;
 }
 
 function renderAll(record) {
@@ -209,7 +216,15 @@ function renderAll(record) {
     return `<td class="state-cell">${lightning}${stateAbbr(item.label, item.kind, item.state, item.summary, combo)}</td>`;
   }).join('');
   const rowClass = combo ? ` class="has-a-combo" data-combo="${record.a}"` : '';
-  return `<tr${rowClass} data-a="${record.a}" data-c="${record.c}"><th scope="row">${recordLink(record)}<small>${escapeHtml(record.year)}</small></th><td class="counts-cell" data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td>${stateCells}</tr>`;
+  return `<tr${rowClass} data-a="${record.a}" data-c="${record.c}"><th scope="row">${recordLink(record)}<small>${escapeHtml(record.year)}</small></th><td class="counts-cell" data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td>${stateCells}<td class="assessment-ref">${assessmentLink(record)}</td></tr>`;
+}
+
+function appendAssessmentHeader(html, sectionClass) {
+  const pattern = new RegExp(`(<section class="${sectionClass}"[\\s\\S]*?<thead>[\\s\\S]*?<tr>)([\\s\\S]*?)(<\\/tr>)`);
+  const match = html.match(pattern);
+  if (!match) throw new Error(`Could not find ${sectionClass} table header`);
+  if (/\bAssessment ref\b/.test(match[2])) return html;
+  return html.replace(pattern, `$1$2<th scope="col">Assessment ref</th>$3`);
 }
 
 const original = requiredFile(pagePath);
@@ -218,6 +233,8 @@ const sourceComment = `<!-- VSM INDEX SOURCE: opensiro/vsm-harness-index@${escap
 if (/<!-- VSM INDEX SOURCE:[\s\S]*?-->/.test(updated)) updated = updated.replace(/<!-- VSM INDEX SOURCE:[\s\S]*?-->/, sourceComment);
 else updated = updated.replace('<main id="main-content">', `${sourceComment}\n<main id="main-content">`);
 updated = updated.replace(/content="Track \d+ evidence-backed agent harness fingerprints across six Viable System Model functions\."/, `content="Track ${records.length} evidence-backed agent harness fingerprints across six Viable System Model functions."`);
+updated = appendAssessmentHeader(updated, 'vhi-combos');
+updated = appendAssessmentHeader(updated, 'vhi-all');
 
 const topPattern = /(<section class="vhi-combos"[\s\S]*?<tbody>)[\s\S]*?(<\/tbody>)/;
 if (!topPattern.test(updated)) throw new Error('Could not find Top 20 table body');
