@@ -38,6 +38,23 @@
       '.index-preview-table tbody th[scope="row"] > a'
     ].join(', ');
 
+    function truncateLeft(source, maxLength) {
+      return source.length <= maxLength
+        ? source
+        : ellipsis + source.slice(-(maxLength - ellipsis.length));
+    }
+
+    function fitAllHarnessLabel(link, source) {
+      if (typeof link.closest !== 'function' || !link.closest('.vhi-all')) return;
+      if (!link.clientWidth || link.scrollWidth <= link.clientWidth) return;
+
+      var maxLength = Math.min(maxLabelLength, source.length);
+      while (maxLength > ellipsis.length + 1 && link.scrollWidth > link.clientWidth) {
+        maxLength -= 1;
+        link.textContent = truncateLeft(source, maxLength);
+      }
+    }
+
     $all(selector).forEach(function (link) {
       var url;
       try {
@@ -50,12 +67,10 @@
       var parts = url.pathname.split('/').filter(Boolean);
       if (parts.length < 2) return;
       var source = parts[0] + '/' + parts[1];
-      var visibleSource = source.length <= maxLabelLength
-        ? source
-        : ellipsis + source.slice(-(maxLabelLength - ellipsis.length));
 
       link.title = 'Source repository: ' + source;
-      link.textContent = visibleSource;
+      link.textContent = truncateLeft(source, maxLabelLength);
+      fitAllHarnessLabel(link, source);
     });
   })();
 
