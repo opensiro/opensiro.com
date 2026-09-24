@@ -6,7 +6,7 @@ on:
   push:
     branches: ["main"]
 
-  # The daily canonical-source sync explicitly dispatches this workflow after
+  # The canonical-source sync explicitly dispatches this workflow after
   # committing a changed materialized snapshot. This is necessary because a
   # push made with GITHUB_TOKEN does not itself trigger another workflow.
   workflow_dispatch:

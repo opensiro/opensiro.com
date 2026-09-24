@@ -16,8 +16,8 @@ on:
       - "tests/vsm-index-metrics-sync.test.cjs"
       - "tests/vsm-oss-metrics-sync.test.cjs"
   schedule:
-    # Once per day at 03:17 UTC. The offset avoids the busiest top-of-hour slot.
-    - cron: "17 3 * * *"
+    # Hourly at :17 UTC to keep the materialized site close to canonical Index main.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
