@@ -34,3 +34,6 @@
 @media(max-width:680px){.vsm-index-page{padding-bottom:47px}.vhi-section-nav{height:47px}.vhi-section-nav-links{justify-content:flex-start;width:max-content;min-width:max-content}.vhi-section-nav-links a{padding:13px 14px}}
 @media(max-width:400px){.vhi-intro h1{font-size:38px}.vhi-table-wrap,.vhi-best-table-wrap,.vhi-legend-wrap{margin-left:-20px;margin-right:-20px;border-left:0;border-right:0}}
 @media(prefers-reduced-motion:reduce){.lightning-bolt{animation:none;stroke-dasharray:none}.has-a-combo .combo-a{box-shadow:none}.vhi-section-nav-links a{transition:none}}
+
+/* Keep the repository end visible without measuring or rewriting links. */
+.vhi-all .vhi-table tbody th>a{direction:rtl;text-align:left}

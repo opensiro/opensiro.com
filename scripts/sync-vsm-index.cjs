@@ -210,7 +210,10 @@ const records = rankingIds.map((id) => {
 });
 
 function recordLink(record) {
-  return `<a href="${escapeHtml(record.repository)}" target="_blank" rel="noopener">${escapeHtml(record.projectName)}</a>`;
+  const url = new URL(record.repository);
+  const source = url.pathname.split('/').filter(Boolean).slice(0, 2).join('/');
+  const label = source.length > 40 ? '...' + source.slice(-37) : source;
+  return `<a href="${escapeHtml(record.repository)}" target="_blank" rel="noopener" title="Source repository: ${escapeHtml(source)}">${escapeHtml(label)}</a>`;
 }
 
 function reviewLink(record) {

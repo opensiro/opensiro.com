@@ -12,6 +12,8 @@ Built as plain HTML/CSS/JS, with no runtime dependencies.
 
 Plain static site — **no build step, no dependencies, no framework.** All fonts and mascot artwork are bundled locally and loaded from `assets/`.
 
+Repository labels and S1–S5 labels are committed as ready-to-display HTML. The Index sync renders canonical owner/repo labels before deployment; the browser does not rewrite or measure them on startup. Both local fonts are preloaded and design-page images load eagerly. Interactive sorting and illustration animations remain progressive enhancements.
+
 Runtime remains dependency-free. Regenerating the stabilized mascot GIF requires Pillow:
 `uv run --no-project --with pillow python scripts/stabilize-mascot-gif.py`.
 
