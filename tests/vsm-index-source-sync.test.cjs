@@ -52,9 +52,9 @@ test('VSM index renders included assessments from canonical source inputs', () =
     assert.equal(run().status, 0);
     const page = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
     assert.match(page, /Track 2 evidence-backed/);
-    assert.doesNotMatch(page, />Gamma<\/a>/, 'unreviewed catalog candidates are not published');
+    assert.doesNotMatch(page, />test-fixture\/gamma<\/a>/, 'unreviewed catalog candidates are not published');
     assert.match(page, /opensiro\/vsm-harness-index@fixture-sha/);
-    assert.ok(page.indexOf('>Beta<\/a>') < page.indexOf('>Alpha<\/a>'));
+    assert.ok(page.indexOf('>test-fixture/beta<\/a>') < page.indexOf('>test-fixture/alpha<\/a>'));
     assert.match(page, /data-a="2" data-c="1"/);
     assert.match(page, /count-a">A <b>2<\/b>/);
     assert.match(page, /count-c">C <b>1<\/b>/);

@@ -86,14 +86,6 @@
   if (!maturity) return;
   var phases = ['INTENT', 'OPERATIONS', 'COORDINATION', 'REGULATION', 'VERIFICATION', 'ADAPTATION', 'IDENTITY'];
   var agentEstimates = ['—', '1–10', '10–50', '50–200', '100–400', '200–800', '500–1,000+'];
-  var systemCodes = ['S1', 'S2', 'S3', 'S3*', 'S4', 'S5'];
-  ['parent', 'child'].forEach(function (side) {
-    Array.prototype.forEach.call(maturity.querySelectorAll('[data-osm-' + side + '] [data-osm-function]'), function (item, index) {
-      var code = document.createElement('b');
-      code.textContent = systemCodes[index];
-      item.insertBefore(code, item.lastChild);
-    });
-  });
   var headlines = [
     'The parent carries the missing functions.',
     'The system does the work. The parent holds it together.',
