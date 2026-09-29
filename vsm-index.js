@@ -46,6 +46,47 @@
     });
   });
 
+  const search = document.querySelector(".vhi-search");
+  const catalog = document.querySelector("#harness-table");
+  if (search && catalog) {
+    const input = search.querySelector("input");
+    const clear = search.querySelector("button");
+    const status = search.querySelector('[role="status"]');
+    const empty = document.querySelector("#harness-search-empty");
+    const normalize = (value) => value.normalize("NFKC").toLocaleLowerCase();
+    // Read identities once, before shared app.js shortens the visible labels.
+    const entries = [...catalog.tBodies[0].rows].map((row) => {
+      const link = row.querySelector('th[scope="row"] > a');
+      return { row, text: normalize(`${link.textContent} ${link.getAttribute("href")}`) };
+    });
+    const filter = () => {
+      const terms = normalize(input.value).trim().split(/\s+/).filter(Boolean);
+      let count = 0;
+      entries.forEach(({ row, text }) => {
+        row.hidden = !terms.every((term) => text.includes(term));
+        if (!row.hidden) count += 1;
+      });
+      clear.disabled = input.value.length === 0;
+      status.textContent = `${count} of ${entries.length} harnesses`;
+      empty.hidden = count !== 0;
+    };
+    const reset = () => {
+      input.value = "";
+      filter();
+      input.focus();
+    };
+    input.addEventListener("input", filter);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        reset();
+      }
+    });
+    clear.addEventListener("click", reset);
+    search.hidden = false;
+    filter();
+  }
+
   const nav = document.querySelector(".vhi-section-nav");
   if (!nav) return;
 
