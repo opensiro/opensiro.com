@@ -1,28 +1,28 @@
-# GitHub-backed human control plane
+# HTML-only GitHub harness control plane
 
 Status: proposal / implementation branch
 
-This branch explores an authenticated human control surface for opensiro.com without introducing an OpenSiro application database or a second source of truth.
+This branch explores an authenticated human control plane for GitHub harnesses through opensiro.com, without introducing an OpenSiro application database or a second source of truth.
 
 ## Architecture label
 
 Use this wording externally and in implementation notes:
 
-> **Static-first, database-less, GitHub-native.**
+> **opensiro.com is an HTML-only control plane for GitHub harnesses.**
 
-More precise form:
+Supporting technical invariant:
 
-> The browser renders the OpenSiro UI. GitHub provides identity, repository state, provenance, and user-authorized actions. OpenSiro does not maintain a separate product datastore. If OAuth cannot be completed safely in a pure browser flow, the only server-side component is a narrow, stateless serverless authentication bridge.
+> **GitHub is the source of truth.**
 
-Avoid describing the architecture as `HTML-only` or `third-party-less`:
+`HTML-only` describes the OpenSiro product surface: the application UI and product logic live in browser-delivered HTML/CSS/JS, while durable identity, repository state, provenance, and user-authorized actions stay in GitHub.
 
-- `HTML-only` is too strict if a secure OAuth code/token exchange requires a server-side boundary.
-- `third-party-less` is inaccurate because GitHub itself is an external service.
-- `serverless` alone is too vague: the important invariant is that OpenSiro does not create a second durable product-state backend.
+A narrow stateless serverless authentication bridge is permitted only if GitHub OAuth cannot be completed safely from the browser without exposing credentials. That bridge is authentication infrastructure, not an OpenSiro application backend: it must not own product state or introduce a product database.
+
+Avoid `third-party-less`: GitHub itself is an external service. Avoid describing opensiro.com as a projection layer; the intended product concept is a control plane over GitHub-hosted harnesses and OpenSiro artifacts.
 
 ## Core invariant
 
-**GitHub is the source of truth. opensiro.com is a projection and control surface.**
+**GitHub is the source of truth. opensiro.com is an HTML-only control plane for GitHub harnesses.**
 
 Do not add a persistent OpenSiro user/account database for this feature.
 
@@ -56,7 +56,7 @@ browser: HTML / CSS / JS
         +-- OpenSiro artifacts
 
 optional narrow boundary:
-OAuth code -> stateless serverless exchange -> GitHub token
+OAuth code -> stateless serverless auth exchange -> GitHub token
 ```
 
 The optional serverless component must:
@@ -111,7 +111,7 @@ For a repository the authenticated user can demonstrably maintain, surface actio
 
 The resulting durable artifact should be an issue, pull request, commit, or other GitHub-native object rather than a row in an OpenSiro database.
 
-### 4. Contributor projection
+### 4. Contributor view
 
 Build a contributor view dynamically from GitHub/OpenSiro artifacts rather than storing a separate profile.
 
@@ -122,7 +122,7 @@ Examples:
 - upstream changes
 - OpenSiro repositories touched
 
-These are projections, not a separate reputation system.
+This is a derived view over GitHub/OpenSiro artifacts, not a separate reputation system or datastore.
 
 ## Permission policy
 
@@ -161,7 +161,7 @@ Any future cache must be documented as disposable and non-authoritative.
 - explicit multi-star confirmation UI;
 - write stars through GitHub only.
 
-### Phase 2 — project projection
+### Phase 2 — project discovery
 
 - discover relevant maintained public repositories;
 - map them against the OpenSiro index;
@@ -177,7 +177,7 @@ Any future cache must be documented as disposable and non-authoritative.
 
 ## Acceptance criteria for the architecture
 
-The feature still satisfies this proposal if the entire OpenSiro application database is deleted because there should be no such database.
+There is no OpenSiro application database to preserve.
 
 A fresh browser session authenticated against GitHub must be able to reconstruct the useful human view from GitHub and existing OpenSiro artifacts alone.
 
