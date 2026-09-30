@@ -6,6 +6,11 @@ on:
   push:
     branches: ["main"]
 
+  # Refresh the profile-wide maintainer card without writing generated stats
+  # back into either repository.
+  schedule:
+    - cron: "*/5 * * * *"
+
   # The canonical-source sync explicitly dispatches this workflow after
   # committing a changed materialized snapshot. This is necessary because a
   # push made with GITHUB_TOKEN does not itself trigger another workflow.
@@ -24,7 +29,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Deploy the materialized snapshot committed in opensiro.com.
+  # Deploy the materialized snapshot committed in opensiro.com plus a live
+  # profile-wide maintainer card generated from GitHub contribution data.
   deploy:
     environment:
       name: github-pages
@@ -33,6 +39,23 @@ jobs:
     steps:
       - name: Checkout site
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate live maintainer card
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --depth=1 https://github.com/xLagerFeuer/xLagerFeuer.git .profile-stats-source
+          (
+            cd .profile-stats-source
+            python scripts/update_maintainer_stats.py
+          )
+          cp .profile-stats-source/assets/maintainer-activity.svg assets/profile-maintainer-activity.svg
+          rm -rf .profile-stats-source
 
       - name: Check static pages and generated snapshot consistency
         run: >-
