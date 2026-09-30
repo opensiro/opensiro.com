@@ -36,7 +36,7 @@ State should come from GitHub or existing OpenSiro repositories:
 - requests/corrections/evidence -> GitHub issues or pull requests
 - conformance work -> repository artifacts and GitHub workflow state
 
-Disposable caches may be added later for performance, but they must never become authoritative state.
+Disposable caches or local browser preferences may be added for convenience, but they must never become authoritative state.
 
 ## Runtime boundary
 
@@ -88,30 +88,82 @@ After GitHub authentication, show the selected OpenSiro repositories and their c
 
 The UI must show exactly which repositories will be affected before any write action.
 
-### 2. Discover my projects
+### 2. Discover and track my AI harnesses
 
-Read the authenticated user's relevant public repositories and map them against the OpenSiro index.
+Do **not** present every repository owned or maintained by the authenticated user as an OpenSiro project.
 
-Possible states:
+Candidate discovery is intentionally narrow and heuristic. From the user's public repositories, surface only repositories that look plausibly harness-related from GitHub-visible metadata such as repository name, description, and topics. The initial heuristic should use a small configurable keyword set centered on terms such as `harness`; it may be expanded later when there is evidence that additional terms improve recall without making the candidate list noisy.
 
-- already assessed
-- reassessment available/requested
-- present in the index but not owned by this user
-- not yet assessed
+A heuristic match is only a candidate. It must not silently become an asserted harness identity.
 
-### 3. Project maintainer actions
+For each candidate, offer an optional confirmation such as:
+
+> **Is this your AI harness?**
+
+The user may confirm it, dismiss it, or ignore it. Dismissal/confirmation is a UI preference, not an assessment result.
+
+The same view must also allow the user to add a repository manually by GitHub repository URL or `owner/name`, including repositories that the heuristic did not catch.
+
+For a confirmed or manually added harness, map it against the OpenSiro Index and show the useful state, for example:
+
+- assessed;
+- reassessment available/requested;
+- known to the Index but not currently associated with the authenticated maintainer;
+- not yet assessed;
+- assessment stale against a newer normative version;
+- compatibility/reassessment status unresolved.
+
+The purpose of this view is not merely repository discovery. It is a lightweight place for a maintainer to track how their harness currently stands relative to the OpenSiro specification/profile over time.
+
+### 3. Version-aware grade tracking
+
+Never display an OpenSiro grade as if it were timeless. A displayed grade must retain the normative versions it was assessed against.
+
+Conceptually, the UI should be able to distinguish:
+
+```text
+Grade: A
+assessed against: Spec X.Y / Profile A.B
+current normative versions: Spec X'.Y' / Profile A'.B'
+status: current | compatibility check needed | reassessment needed | unresolved
+```
+
+The exact field names should follow the canonical OpenSiro artifacts rather than inventing a second grading schema in opensiro.com.
+
+Expected specification behavior:
+
+- specification version changes may change what compatibility means;
+- a **specification major** should be treated as a meaningful compatibility boundary, because major revisions are expected to make criteria stricter and/or more detailed;
+- therefore an old grade must not automatically be presented as current under a new specification major;
+- the UI should surface that a compatibility evaluation or reassessment is required according to the normative versioning policy.
+
+Profile-major behavior is intentionally **not frozen by this branch yet**. A large Profile major may ultimately require a full reassessment, but opensiro.com must not encode that as policy until the Profile/versioning rules define it. Until then, a grade crossing an unresolved Profile-major boundary should be shown as needing an explicit disposition rather than silently carried forward.
+
+### 4. Tracking persistence without an OpenSiro database
+
+A manually added/confirmed harness does not justify an OpenSiro account database.
+
+Default behavior may keep convenience state locally in the browser (for example, which candidate was dismissed or which repository the user wants visible in the control plane). Local state is non-authoritative and may disappear.
+
+If durable or cross-device tracking is later required, persistence must be an explicit GitHub-native artifact or another source-of-truth mechanism already governed by OpenSiro. The exact artifact/schema is out of scope for this branch and must be designed before persistent tracking is implemented.
+
+Assessment grades, evidence, normative versions, and reassessment decisions must always come from canonical OpenSiro/GitHub artifacts, never from browser storage.
+
+### 5. Project maintainer actions
 
 For a repository the authenticated user can demonstrably maintain, surface actions such as:
 
-- view current assessment
-- submit evidence
-- request reassessment
-- propose a correction
-- start a conformance path
+- view current assessment;
+- view which Spec/Profile versions the grade belongs to;
+- inspect whether the assessment is current, stale, or requires a compatibility decision;
+- submit evidence;
+- request reassessment;
+- propose a correction;
+- start a conformance path.
 
 The resulting durable artifact should be an issue, pull request, commit, or other GitHub-native object rather than a row in an OpenSiro database.
 
-### 4. Contributor view
+### 6. Contributor view
 
 Build a contributor view dynamically from GitHub/OpenSiro artifacts rather than storing a separate profile.
 
@@ -142,7 +194,7 @@ Default expectation:
 - no analytics-derived identity profile required for the feature;
 - GitHub/OpenSiro public artifacts remain the durable provenance layer.
 
-Any future cache must be documented as disposable and non-authoritative.
+Any future cache or local preference must be documented as disposable and non-authoritative.
 
 ## Implementation phases
 
@@ -161,11 +213,16 @@ Any future cache must be documented as disposable and non-authoritative.
 - explicit multi-star confirmation UI;
 - write stars through GitHub only.
 
-### Phase 2 — project discovery
+### Phase 2 — harness discovery + tracking
 
-- discover relevant maintained public repositories;
-- map them against the OpenSiro index;
-- show assessment/conformance state dynamically.
+- read the authenticated user's relevant public repositories;
+- apply a conservative, configurable harness-keyword heuristic rather than showing all repositories;
+- present heuristic matches as optional candidates with `Is this your AI harness?` confirmation;
+- allow manual repository addition by URL or `owner/name`;
+- map confirmed/manually added harnesses against the OpenSiro Index;
+- display grade plus the Spec/Profile versions the assessment belongs to;
+- display whether that assessment is current, requires compatibility evaluation/reassessment, or has unresolved version-policy status;
+- keep convenience tracking local unless/until a GitHub-native durable tracking artifact is explicitly designed.
 
 ### Phase 3 — GitHub-native actions
 
@@ -179,6 +236,10 @@ Any future cache must be documented as disposable and non-authoritative.
 
 There is no OpenSiro application database to preserve.
 
-A fresh browser session authenticated against GitHub must be able to reconstruct the useful human view from GitHub and existing OpenSiro artifacts alone.
+A fresh browser session authenticated against GitHub must be able to reconstruct authoritative identity, repository, assessment, grade, evidence, and normative-version state from GitHub and existing OpenSiro artifacts alone. Local convenience choices are allowed to be absent in a fresh session.
+
+A heuristic repository match must never be treated as proof that a repository is an AI harness; user confirmation or manual addition only controls the UI view and does not substitute for OpenSiro assessment/admission.
+
+A grade must not be presented without enough normative-version context to tell whether it is current under the applicable Spec/Profile policy.
 
 If a serverless auth bridge disappears, only authentication/token exchange should be affected; no authoritative OpenSiro product state should be lost.
