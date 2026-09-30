@@ -84,9 +84,20 @@ Do not introduce these merely to support login or personalization:
 
 ### 1. Star OpenSiro
 
-After GitHub authentication, show the selected OpenSiro repositories and their current star state, then let the user explicitly star the chosen set.
+After GitHub authentication, show the relevant OpenSiro repositories and their current star state.
 
-The UI must show exactly which repositories will be affected before any write action.
+The control plane should support both:
+
+- selecting individual repositories to star;
+- a clear **Star all OpenSiro repos** action for users who want to support/follow the whole OpenSiro repository set in one step.
+
+`Star all OpenSiro repos` is a bulk write action, not a hidden shortcut. Before executing it, the UI must show the exact repositories that will be affected and indicate which ones are already starred. The user must explicitly confirm the action.
+
+The bulk action should only write missing stars; already-starred repositories should remain unchanged. The result should report the effective outcome, for example `Starred 5 new repositories · 2 already starred`, rather than pretending every repository changed state.
+
+The OpenSiro repository set used by this action must come from an explicit maintained source/list rather than an accidental scrape of every repository in the organization. This lets OpenSiro decide which repositories belong in the public multi-star surface.
+
+All star writes go directly to GitHub under the authenticated user's authorization. OpenSiro does not store a duplicate star ledger.
 
 ### 2. Discover and track my AI harnesses
 
@@ -209,9 +220,14 @@ Any future cache or local preference must be documented as disposable and non-au
 
 - sign in with GitHub;
 - display authenticated GitHub identity;
-- read star state for the selected OpenSiro repositories;
-- explicit multi-star confirmation UI;
-- write stars through GitHub only.
+- read star state for the maintained OpenSiro multi-star repository set;
+- allow individual repository selection;
+- provide a first-class `Star all OpenSiro repos` action;
+- show the exact repository set before any bulk write;
+- require explicit confirmation;
+- skip already-starred repositories and report the effective result;
+- write stars through GitHub only;
+- store no duplicate star state in OpenSiro.
 
 ### Phase 2 — harness discovery + tracking
 
@@ -236,10 +252,12 @@ Any future cache or local preference must be documented as disposable and non-au
 
 There is no OpenSiro application database to preserve.
 
-A fresh browser session authenticated against GitHub must be able to reconstruct authoritative identity, repository, assessment, grade, evidence, and normative-version state from GitHub and existing OpenSiro artifacts alone. Local convenience choices are allowed to be absent in a fresh session.
+A fresh browser session authenticated against GitHub must be able to reconstruct authoritative identity, repository, assessment, grade, evidence, normative-version state, and current star state from GitHub and existing OpenSiro artifacts alone. Local convenience choices are allowed to be absent in a fresh session.
 
 A heuristic repository match must never be treated as proof that a repository is an AI harness; user confirmation or manual addition only controls the UI view and does not substitute for OpenSiro assessment/admission.
 
 A grade must not be presented without enough normative-version context to tell whether it is current under the applicable Spec/Profile policy.
+
+The `Star all OpenSiro repos` flow must always expose the exact maintained repository set and require explicit user confirmation before bulk writes.
 
 If a serverless auth bridge disappears, only authentication/token exchange should be affected; no authoritative OpenSiro product state should be lost.
