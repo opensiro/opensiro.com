@@ -173,15 +173,15 @@ test('Assessed by model era is present in both monitors without modifying canoni
   const server=environment('',true);await server.settle();
   for (const env of [paginated,server]) {
     assert.match(env.body.innerHTML,/class="assessment-model"/);
-    assert.match(env.body.innerHTML,/GPT-5\.6 Sol\*|GPT-6 Sol\*|Transition\*/);
+    assert.match(env.body.innerHTML,/GPT-5\.6 Sol|GPT-6 Sol|GPT-5\.6 \/ GPT-6 \(rollout\)/);
     assert.equal((env.body.innerHTML.match(/class="assessment-model"/g)||[]).length, env.body.rows.length);
   }
   // Source data remains unchanged, including historical dates and classifications.
   assert.doesNotMatch(fs.readFileSync(path.join(root,'scripts/templates/vsm-index-source.html'),'utf8'),/assessment-model/);
   const entries=manifest().entries;
-  const inferred=entries.map(e=>e.date < '2026-10-07' ? 'GPT-5.6 Sol*' : e.date === '2026-10-07' ? 'Transition*' : 'GPT-6 Sol*');
+  const inferred=entries.map(e=>e.date < '2026-10-07' ? 'GPT-5.6 Sol' : e.date === '2026-10-07' ? 'GPT-5.6 / GPT-6 (rollout)' : 'GPT-6 Sol');
   assert.equal(inferred.length,entries.length);
-  assert.ok(inferred.includes('GPT-5.6 Sol*'));
+  assert.ok(inferred.includes('GPT-5.6 Sol'));
 });
 
 
@@ -189,7 +189,7 @@ test('Assessed by header is inserted after Reviewed, retains sort indices, and s
   const env=environment('',true,true);
   await env.settle();
   assert.equal(env.buttons.length,11,'the original ten sortable headers plus one model header');
-  assert.equal(env.buttons[3].textContent,'Assessed by*');
+  assert.equal(env.buttons[3].textContent,'Assessed by');
   assert.equal(env.buttons[3].dataset.sortIndex,'3');
   assert.equal(env.buttons[4].dataset.sortIndex,'4','Pinned ref sort must shift by one');
   assert.equal(env.buttons[10].dataset.sortIndex,'10','S5 must retain its semantic position');
@@ -199,9 +199,23 @@ test('Assessed by header is inserted after Reviewed, retains sort indices, and s
   await env.settle();
   assert.match(env.location.search,/sort=model/);
   assert.match(env.location.search,/dir=desc/);
-  assert.match(env.body.innerHTML.slice(0,1000),/GPT-6 Sol\*/);
+  assert.match(env.body.innerHTML.slice(0,1000),/GPT-6 Sol/);
   env.buttons[3].handlers.click();
   await env.settle();
   assert.match(env.location.search,/dir=asc/);
-  assert.match(env.body.innerHTML.slice(0,1000),/GPT-5\.6 Sol\*/);
+  assert.match(env.body.innerHTML.slice(0,1000),/GPT-5\.6 Sol/);
+});
+
+
+test('rollout label communicates alternatives, not two verified assessor runs',async()=>{
+  const env=environment('',true,true);
+  await env.settle();
+  const rows=(env.body.innerHTML.match(/class="assessment-model"[^>]*>GPT-5\.6 \/ GPT-6 \(rollout\)<\/td>/g)||[]);
+  const expected=manifest().entries.filter(e=>e.date==='2026-10-07').length;
+  assert.ok(expected>0);
+  assert.equal(rows.length,expected);
+  assert.doesNotMatch(env.body.innerHTML,/GPT-5\.6 Sol\*|GPT-6 Sol\*|Transition\*/);
+  assert.match(env.body.innerHTML,/Exact per-assessment model is unknown/);
+  assert.doesNotMatch(env.body.innerHTML,/both models (were|worked|used)/i);
+  assert.equal(env.buttons[3].textContent,'Assessed by');
 });

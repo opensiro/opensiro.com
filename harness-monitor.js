@@ -14,9 +14,9 @@
   function modelEra(reviewedAt) {
     const day = String(reviewedAt || '').slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return {label:'Unknown', order:0, detail:'Missing review date: model unknown'};
-    if (day < '2026-10-07') return {label:'GPT-5.6 Sol*', order:1, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
-    if (day === '2026-10-07') return {label:'Transition*', order:2, detail:'GPT-6 Sol rollout day; model cannot be inferred'};
-    return {label:'GPT-6 Sol*', order:3, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
+    if (day < '2026-10-07') return {label:'GPT-5.6 Sol', order:1, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
+    if (day === '2026-10-07') return {label:'GPT-5.6 / GPT-6 (rollout)', order:2, detail:'GPT-5.6 Sol or GPT-6 Sol may have been used during the rollout day. Exact per-assessment model is unknown; this is a date-based estimate, not evidence both models participated.'};
+    return {label:'GPT-6 Sol', order:3, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
   }
   function assessedByColumn(entry, html) {
     const inferred = modelEra(entry.date);
@@ -28,12 +28,12 @@
   if (headings?.insertBefore) {
     const th = document.createElement('th');
     th.scope = 'col';
-    th.title = 'Date-inferred ChatGPT Chat model era, not verified execution provenance. * denotes inferred.';
+    th.title = 'Model era inferred from review date, not verified execution provenance; on rollout day either GPT-5.6 Sol or GPT-6 Sol may have been used.';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'sort-button';
     button.dataset.sortType = 'number';
-    button.textContent = 'Assessed by*';
+    button.textContent = 'Assessed by';
     th.appendChild(button);
     headings.insertBefore(th, headings.cells[3] || null);
     headings.querySelectorAll('.sort-button').forEach((control, index) => { control.dataset.sortIndex = String(index); });
