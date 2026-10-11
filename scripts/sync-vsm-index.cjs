@@ -5,7 +5,8 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
-const pagePath = path.join(root, 'vsm-index.html');
+const templatePath = path.join(root, 'scripts/templates/vsm-index-source.html');
+const pagePath = fs.existsSync(templatePath) ? templatePath : path.join(root, 'vsm-index.html');
 
 function argValue(name) {
   const index = process.argv.indexOf(name);
@@ -62,20 +63,20 @@ function listMarkdownFiles(dir) {
 function assessmentRefsByPath() {
   let history;
   try {
-    history = execFileSync('git', ['-C', sourceRoot, 'log', '--format=@@%H', '--name-only', '--', 'assessments'], { encoding: 'utf8' });
+    history = execFileSync('git', ['-C', sourceRoot, 'log', '--format=@@%H|%cI', '--name-only', '--', 'assessments'], { encoding: 'utf8' });
   } catch (error) {
     throw new Error(`Could not read assessment history from ${sourceRoot}: ${error.message}`);
   }
   const refs = new Map();
-  let commit = null;
+  let commit = null, updatedAt = null;
   for (const rawLine of history.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line) continue;
     if (line.startsWith('@@')) {
-      commit = line.slice(2);
+      [commit, updatedAt] = line.slice(2).split('|');
       continue;
     }
-    if (commit && line.startsWith('assessments/') && line.endsWith('.md') && !refs.has(line)) refs.set(line, commit);
+    if (commit && line.startsWith('assessments/') && line.endsWith('.md') && !refs.has(line)) refs.set(line, {ref:commit, updatedAt});
   }
   return refs;
 }
@@ -177,9 +178,10 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
     return { label, kind, state, summary: sectionSummary(markdown, label, fallbackSummary(state)) };
   });
   const assessmentPath = path.relative(sourceRoot, file).split(path.sep).join('/');
-  const assessmentRef = assessmentRefs.get(assessmentPath);
+  const history = assessmentRefs.get(assessmentPath);
+  const assessmentRef = history?.ref;
   if (!assessmentRef) throw new Error(`Missing Git history for included assessment: ${assessmentPath}`);
-  assessments.set(id, { id, meta, states, assessmentPath, assessmentRef });
+  assessments.set(id, { id, meta, states, assessmentPath, assessmentRef, assessmentUpdatedAt:history.updatedAt });
 }
 
 const rankingText = requiredFile(path.join(sourceRoot, 'RANKINGS.md'));
@@ -206,7 +208,7 @@ const records = rankingIds.map((id) => {
   const year = (catalog.repository_created_at || '').slice(0, 4) || '—';
   const a = assessment.states.filter((item) => stateBase(item.state) === 'A').length;
   const c = assessment.states.filter((item) => stateBase(item.state) === 'C').length;
-  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath, assessmentRef: assessment.assessmentRef };
+  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath, assessmentRef: assessment.assessmentRef, assessmentUpdatedAt:assessment.assessmentUpdatedAt };
 });
 
 function recordLink(record) {
@@ -241,7 +243,7 @@ function renderAll(record) {
     return `<td class="state-cell">${lightning}${stateAbbr(item.label, item.kind, item.state, item.summary, combo)}</td>`;
   }).join('');
   const rowClass = combo ? ` class="has-a-combo" data-combo="${record.a}"` : '';
-  return `<tr${rowClass} data-a="${record.a}" data-c="${record.c}"><th scope="row">${recordLink(record)}<small>${escapeHtml(record.year)}</small></th><td class="counts-cell" data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td>${stateCells}<td class="assessment-ref">${assessmentLink(record)}</td></tr>`;
+  return `<tr${rowClass} data-a="${record.a}" data-c="${record.c}" data-assessment-at="${escapeHtml(record.assessmentUpdatedAt)}"><th scope="row">${recordLink(record)}<small>${escapeHtml(record.year)}</small></th><td class="counts-cell" data-sort-value="${record.a}">${countsMarkup(record.a, record.c)}</td><td class="review-date"><time datetime="${escapeHtml(record.reviewedAt)}">${escapeHtml(record.reviewedAt)}</time></td><td class="review-ref">${reviewLink(record)}</td>${stateCells}<td class="assessment-ref">${assessmentLink(record)}</td></tr>`;
 }
 
 function appendAssessmentHeader(html, sectionClass) {
