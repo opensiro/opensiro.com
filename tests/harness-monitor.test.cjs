@@ -28,15 +28,20 @@ test('monitor assets reproduce the complete source without embedding the full ta
   assert.match(landing,/action="harness-monitor.html"/);
   for (const state of ['A(P)','C(P)','Agent-owned','Composable','Parent-assisted','Unknown','No supplied path']) assert.ok(landing.includes(state));
 });
-function environment(search='',server=false) {
+function environment(search='',server=false,withHeader=false) {
   const controls = new Map();
   const element = id => {if (!controls.has(id)) controls.set(id,{value:'',textContent:'',innerHTML:'',handlers:{},disabled:false,addEventListener(type,fn){this.handlers[type]=fn;},focus(){}});return controls.get(id);};
   let html='';
   const body={replaceChildren(){html='';},querySelectorAll(){return[];},get rows(){return html.match(/<tr\b/g)||[];},get innerHTML(){return html;},set innerHTML(value){html=value;}};
   const buttons=Array.from({length:10},(_,index)=>({dataset:{sortIndex:String(index),sortType:index===0||index===3?'text':index===2?'date':index===1?'number':'state'},classList:{toggle(){}},closest(){return {setAttribute(){}};},handlers:{},addEventListener(type,fn){this.handlers[type]=fn;}}));
   const table=element('harness-table');table.tBodies=[body];table.attributes={};table.setAttribute=(k,v)=>table.attributes[k]=v;table.getAttribute=k=>table.attributes[k];table.querySelectorAll=()=>buttons;const wrap={scrollTop:0,scrollLeft:0};table.closest=()=>wrap;
+  if (withHeader) {
+    const cells = buttons.map(button=>({childButton:button}));
+    const header = {cells,insertBefore(th,reference){const index=reference?cells.indexOf(reference):cells.length;assert.ok(index>=0);cells.splice(index,0,th);buttons.splice(index,0,th.childButton);},querySelectorAll(){return buttons;}};
+    table.tHead={rows:[header]};
+  }
   const requested=[];const timers=[];const events={};const location={search,pathname:'/harness-monitor.html',hash:''};
-  const context={URL,URLSearchParams,console,Date,Promise,Map,Set,Number,String,Math,window:{harnessChunks:{}},location,setTimeout,clearTimeout,setInterval(fn,ms){timers.push({fn,ms});},history:{pushState(a,b,url){location.search=url.slice(url.indexOf('?'));},replaceState(a,b,url){location.search=url.slice(url.indexOf('?'));}},document:{body:{dataset:{monitorMode:server?'server':''}},hidden:false,getElementById:element,addEventListener(type,fn){events[type]=fn;},createElement(){return {remove(){}};},head:{append(script){requested.push(script.src);queueMicrotask(()=>{if(context.failManifest && script.src.includes('manifest')) {script.onerror();return;} const file=path.join(root,script.src.split('?')[0]);if(fs.existsSync(file)){vm.runInContext(fs.readFileSync(file,'utf8'),context);script.onload();}else script.onerror();});}}}};
+  const context={URL,URLSearchParams,console,Date,Promise,Map,Set,Number,String,Math,window:{harnessChunks:{}},location,setTimeout,clearTimeout,setInterval(fn,ms){timers.push({fn,ms});},history:{pushState(a,b,url){location.search=url.slice(url.indexOf('?'));},replaceState(a,b,url){location.search=url.slice(url.indexOf('?'));}},document:{body:{dataset:{monitorMode:server?'server':''}},hidden:false,getElementById:element,addEventListener(type,fn){events[type]=fn;},createElement(){return {remove(){},dataset:{},classList:{toggle(){}},handlers:{},appendChild(button){this.childButton=button;},addEventListener(type,fn){this.handlers[type]=fn;},closest(){return {setAttribute(){}};}};},head:{append(script){requested.push(script.src);queueMicrotask(()=>{if(context.failManifest && script.src.includes('manifest')) {script.onerror();return;} const file=path.join(root,script.src.split('?')[0]);if(fs.existsSync(file)){vm.runInContext(fs.readFileSync(file,'utf8'),context);script.onload();}else script.onerror();});}}}};
   context.window.addEventListener=(type,fn)=>events[type]=fn;
   vm.createContext(context);vm.runInContext(source,context);
   const settle=async()=>{for(let i=0;i<10;i++) await new Promise(resolve=>setImmediate(resolve));};
@@ -177,4 +182,26 @@ test('Assessed by model era is present in both monitors without modifying canoni
   const inferred=entries.map(e=>e.date < '2026-10-07' ? 'GPT-5.6 Sol*' : e.date === '2026-10-07' ? 'Transition*' : 'GPT-6 Sol*');
   assert.equal(inferred.length,entries.length);
   assert.ok(inferred.includes('GPT-5.6 Sol*'));
+});
+
+
+test('Assessed by header is inserted after Reviewed, retains sort indices, and sorts server rows',async()=>{
+  const env=environment('',true,true);
+  await env.settle();
+  assert.equal(env.buttons.length,11,'the original ten sortable headers plus one model header');
+  assert.equal(env.buttons[3].textContent,'Assessed by*');
+  assert.equal(env.buttons[3].dataset.sortIndex,'3');
+  assert.equal(env.buttons[4].dataset.sortIndex,'4','Pinned ref sort must shift by one');
+  assert.equal(env.buttons[10].dataset.sortIndex,'10','S5 must retain its semantic position');
+  const cells=env.body.innerHTML.match(/class="assessment-model"/g)||[];
+  assert.equal(cells.length,manifest().entries.length);
+  env.buttons[3].handlers.click();
+  await env.settle();
+  assert.match(env.location.search,/sort=model/);
+  assert.match(env.location.search,/dir=desc/);
+  assert.match(env.body.innerHTML.slice(0,1000),/GPT-6 Sol\*/);
+  env.buttons[3].handlers.click();
+  await env.settle();
+  assert.match(env.location.search,/dir=asc/);
+  assert.match(env.body.innerHTML.slice(0,1000),/GPT-5\.6 Sol\*/);
 });
