@@ -3,3 +3,6 @@
 .harness-monitor-page .vhi-all{padding:0}.harness-monitor-page .vhi-metrics{padding:16px 0 0;margin-top:0}.harness-monitor-page .vhi-org-metrics{padding:0}.harness-monitor-page .vhi-metric-grid>div{min-height:70px}
 .monitor-view-links{display:grid;gap:10px;font-size:11px}.monitor-pagination[hidden]{display:none}
 html{scrollbar-gutter:stable}.monitor-pagination{justify-content:flex-end;gap:8px}.monitor-pagination>span{margin-right:12px}.harness-monitor-page:not(.server-edition) .vhi-table-wrap{height:clamp(240px,65vh,800px);max-height:none;scrollbar-gutter:stable;overflow-anchor:none;scroll-behavior:auto}.monitor-health #monitor-freshness{font-variant-numeric:tabular-nums}
+
+/* Derived display only: not attested author/model provenance. */
+.harness-monitor-page .vhi-table .assessment-model{white-space:nowrap;font-size:10px;font-variant-numeric:tabular-nums;color:var(--muted)}
