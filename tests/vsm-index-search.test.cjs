@@ -58,7 +58,7 @@ test('catalog search retains full identities, filters, clears, and preserves sor
 });
 
 test('search is progressive enhancement and caches names before shared label formatting', () => {
-  const html = fs.readFileSync(path.join(__dirname, '../vsm-index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '../scripts/templates/vsm-index-source.html'), 'utf8');
   assert.match(html, /class="vhi-search"[^>]* hidden/);
   assert.ok(html.indexOf('<script src="vsm-index.js') < html.indexOf('<script src="app.js'));
 });

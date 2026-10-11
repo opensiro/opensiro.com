@@ -40,6 +40,7 @@ jobs:
           tests/static-site.test.cjs
           tests/harness-source-labels.test.cjs
           tests/index-preview-sync.test.cjs
+          tests/harness-monitor.test.cjs
           tests/vsm-index-source-sync.test.cjs
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
@@ -47,12 +48,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Stage active site
+        run: |
+          mkdir -p "$RUNNER_TEMP/opensiro-pages"
+          rsync -a --exclude='/scripts/templates/' --exclude='/.git/' ./ "$RUNNER_TEMP/opensiro-pages/"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Keep reruns of the same workflow run unambiguous for deploy-pages.
           name: github-pages-${{ github.run_attempt }}
-          path: '.'
+          path: ${{ runner.temp }}/opensiro-pages
 
       - name: Deploy to GitHub Pages
         id: deployment

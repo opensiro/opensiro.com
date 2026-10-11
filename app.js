@@ -17,7 +17,7 @@
     var current = file === '' || file === '/' || file === 'index.html'
       ? null                       // home has no active state
       : (file === 'opensiro.html' || file === 'vsm.html') ? 'products'
-      : file === 'vsm-index.html' ? 'index'
+      : (file === 'vsm-index.html' || file === 'harness-monitor.html' || file === 'harness-server.html') ? 'index'
       : file.replace(/\.html$/, ''); // products.html -> products
     if (!current) return;
     $all('[data-nav]').forEach(function (el) {
