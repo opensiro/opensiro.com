@@ -161,3 +161,20 @@ test('latest assessment card is independent of search and the recent list contai
   env.element('monitor-clear').handlers.click();await env.settle();
   assert.equal(env.element('server-latest-assessment').innerHTML,card);
 });
+
+
+test('Assessed by model era is present in both monitors without modifying canonical snapshot rows', async()=>{
+  const paginated=environment();await paginated.settle();
+  const server=environment('',true);await server.settle();
+  for (const env of [paginated,server]) {
+    assert.match(env.body.innerHTML,/class="assessment-model"/);
+    assert.match(env.body.innerHTML,/GPT-5\.6 Sol\*|GPT-6 Sol\*|Transition\*/);
+    assert.equal((env.body.innerHTML.match(/class="assessment-model"/g)||[]).length, env.body.rows.length);
+  }
+  // Source data remains unchanged, including historical dates and classifications.
+  assert.doesNotMatch(fs.readFileSync(path.join(root,'scripts/templates/vsm-index-source.html'),'utf8'),/assessment-model/);
+  const entries=manifest().entries;
+  const inferred=entries.map(e=>e.date < '2026-10-07' ? 'GPT-5.6 Sol*' : e.date === '2026-10-07' ? 'Transition*' : 'GPT-6 Sol*');
+  assert.equal(inferred.length,entries.length);
+  assert.ok(inferred.includes('GPT-5.6 Sol*'));
+});

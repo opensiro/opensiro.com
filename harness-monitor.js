@@ -8,7 +8,36 @@
   const status = $('monitor-status');
   const params = () => new URLSearchParams(location.search);
   const normalize = value => value.normalize('NFKC').toLocaleLowerCase();
-  const columns = ['name','a','date','ref',0,1,2,3,4,5,'rank'];
+  const columns = ['name','a','date','model','ref',0,1,2,3,4,5,'rank'];
+  // Presentation-only model-era estimate; not a recorded execution identity.
+  // Only regular ChatGPT Chat is assumed, never Work/Codex/API.
+  function modelEra(reviewedAt) {
+    const day = String(reviewedAt || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return {label:'Unknown', order:0, detail:'Missing review date: model unknown'};
+    if (day < '2026-10-07') return {label:'GPT-5.6 Sol*', order:1, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
+    if (day === '2026-10-07') return {label:'Transition*', order:2, detail:'GPT-6 Sol rollout day; model cannot be inferred'};
+    return {label:'GPT-6 Sol*', order:3, detail:'Date-inferred ChatGPT Chat era; not a verified model run'};
+  }
+  function assessedByColumn(entry, html) {
+    const inferred = modelEra(entry.date);
+    const cell = `<td class="assessment-model" data-sort-value="${inferred.order}" title="${inferred.detail}">${inferred.label}</td>`;
+    return html.replace(/(<td class="review-date">[\s\S]*?<\/td>)/, `$1${cell}`);
+  }
+  // Add one view-only column after Reviewed in both paginated and Server Edition tables.
+  const headings = table.tHead?.rows?.[0];
+  if (headings?.insertBefore) {
+    const th = document.createElement('th');
+    th.scope = 'col';
+    th.title = 'Date-inferred ChatGPT Chat model era, not verified execution provenance. * denotes inferred.';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'sort-button';
+    button.dataset.sortType = 'number';
+    button.textContent = 'Assessed by*';
+    th.appendChild(button);
+    headings.insertBefore(th, headings.cells[3] || null);
+    headings.querySelectorAll('.sort-button').forEach((control, index) => { control.dataset.sortIndex = String(index); });
+  }
   const keyStates = ['A','C','P','—','?','A(P)','C(P)'];
   const systemNames = ['S1','S2','S3','S3*','S4','S5'];
   const serverButtons = () => [...(document.querySelectorAll?.('[data-server-state]') || [])];
@@ -53,7 +82,7 @@
       if (serverMode && !state.systems.every((keys,index)=>!keys.length || keys.includes(e.states[index]))) return false;
       return state.filter === 'all' || state.filter === 'agent' && e.a > 0 || state.filter === 'full' && e.a === 6 || state.filter === 'composable' && e.c > 0 || state.filter === 'parent' && e.states.some(s => s.includes('P')) || state.filter === 'unknown' && e.states.includes('?');
     }).sort((a,b) => {
-      const value = e => typeof state.sort === 'number' ? states.get(e.states[state.sort]) || 0 : e[state.sort];
+      const value = e => state.sort === 'model' ? modelEra(e.date).order : typeof state.sort === 'number' ? states.get(e.states[state.sort]) || 0 : e[state.sort];
       const av = value(a), bv = value(b);
       const result = typeof av === 'number' ? av-bv : String(av).localeCompare(String(bv),undefined,{numeric:true,sensitivity:'base'});
       return (state.dir === 'desc' ? -result : result) || a.rank-b.rank;
@@ -124,7 +153,7 @@
       if (current !== view) return;
       const retainedScroll=preserveScroll ? {top:wrap.scrollTop,left:wrap.scrollLeft} : scroll;
       // HTML is generated locally from escaped, pinned canonical assessments.
-      body.innerHTML = entries.map(e => serverMode ? allRows[e.rank-1] : window.harnessChunks[e.file][e.offset]).join('');
+      body.innerHTML = entries.map(e => assessedByColumn(e, serverMode ? allRows[e.rank-1] : window.harnessChunks[e.file][e.offset])).join('');
       body.querySelectorAll('th[scope="row"] > a').forEach(link => {
         const url = new URL(link.href);
         if (url.hostname === 'github.com') {link.title = `${link.textContent} · ${url.pathname.slice(1)}`; link.textContent = url.pathname.slice(1);}
