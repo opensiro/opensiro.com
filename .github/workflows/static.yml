@@ -39,6 +39,9 @@ jobs:
     steps:
       - name: Checkout site
         uses: actions/checkout@v4
+        with:
+          # Deploy latest main even for queued push/schedule events.
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -67,6 +70,10 @@ jobs:
           tests/vsm-index-source-sync.test.cjs
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
+          tests/source-snapshot-sync.test.cjs
+
+      - name: Validate canonical Index snapshot provenance
+        run: node scripts/snapshot-provenance.cjs --check
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
