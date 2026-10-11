@@ -43,7 +43,7 @@ await page.locator('[data-demo-toggle]').click();
 assert.notEqual(await page.locator('[data-demo-text]').textContent(),first);
 await page.locator('#index-query').fill('codex');
 await page.locator('.index-search-form button').click();
-await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===1);
+await page.waitForFunction(()=>window.harnessSnapshot && document.querySelector('#harness-table tbody').rows.length===window.harnessSnapshot.entries.filter(e=>(e.name+' '+e.repository).toLowerCase().includes('codex')).length);
 assert.ok(page.url().includes('q=codex'));
 // Pixel VSM signals move automatically and respect reduced motion.
 await page.goto(landing);await page.emulateMedia({reducedMotion:'no-preference'});
@@ -78,7 +78,7 @@ assert.equal(await page.locator('.monitor-pagination').isVisible(),false);
 const latestCard=await page.locator('#server-latest-assessment').innerHTML();
 assert.ok(await page.locator('#server-latest-assessment .server-assessment-link').getAttribute('href'));
 await page.locator('#monitor-query').fill('codex');
-await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===1);
+await page.waitForFunction(()=>window.harnessSnapshot && document.querySelector('#harness-table tbody').rows.length===window.harnessSnapshot.entries.filter(e=>(e.name+' '+e.repository).toLowerCase().includes('codex')).length);
 assert.equal(await page.locator('#server-latest-assessment').innerHTML(),latestCard);
 await page.locator('#monitor-clear').click();
 await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===window.harnessSnapshot.entries.length);
