@@ -5,7 +5,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const homePath = path.join(root, 'index.html');
-const catalogPath = path.join(root, 'vsm-index.html');
+const templatePath = path.join(root, 'scripts/templates/vsm-index-source.html');
+const catalogPath = fs.existsSync(templatePath) ? templatePath : path.join(root, 'vsm-index.html');
 const home = fs.readFileSync(homePath, 'utf8');
 const catalog = fs.readFileSync(catalogPath, 'utf8');
 

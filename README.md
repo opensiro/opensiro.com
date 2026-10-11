@@ -150,8 +150,9 @@ Inter-page links are relative. External product links point at GitHub:
 Paused social links (not rendered): `twitter.com/opensiro`, `youtube.com/@opensiro`,
 `discord.gg/opensiro`.
 
-The four rows in the home Index preview come from the first four rows of the Top 20 table in `vsm-index.html`.
-After editing the full table, run `node scripts/sync-index-preview.cjs` to refresh `index.html`.
+The four rows in the home Index preview come from the first four ranked rows of `scripts/templates/vsm-index-source.html`.
+After syncing the source snapshot, run `node scripts/sync-index-preview.cjs` to refresh `index.html`,
+then `node scripts/build-harness-monitor.cjs` to rebuild the paginated monitor.
 Run it with `--check` to report stale output without editing. The GitHub Pages workflow
 syncs and checks the preview before publishing.
 
@@ -206,3 +207,27 @@ The following licenses and use policies apply to this repository:
 the Departure Mono font, you must (a) credit "Departure Mono by Helena Zhang",
 and (b) retain the OFL-1.1 text in `assets/DepartureMono-OFL.txt`. The font
 cannot be relicensed under MIT or any other license.
+
+## Harness index
+
+### Paginated harness monitor
+
+`vsm-index.html` is the compact Index landing page: search, the complete autonomy state key, and a monitor link. `harness-monitor.html` contains the dense, sortable monitor with URL-backed search, filters and 20/50/100 rows per page. It loads a lightweight identity manifest and only the needed 20-row evidence chunks. Scripts load as classic local assets, so both HTTPS hosting and `file://` previews work.
+
+The canonical materialized input is `scripts/templates/vsm-index-source.html`. Source/metrics sync scripts update that input; `sync-index-preview.cjs` reads its ranked preview. After syncing, run `node scripts/build-harness-monitor.cjs` (or `--check` to verify reproducibility). The hourly canonical sync workflow now builds and commits the monitor and its content-addressed assets. The source template is excluded from the Pages artifact.
+
+While open, the monitor checks for a newer published manifest every 60 seconds and on returning to the tab. The paginated view keeps this background check quiet; server edition displays source/check times and a Refresh now button. Checks show the latest deployed snapshot, not live harness runtime availability. Failed checks retain the last loaded snapshot and display the failure.
+
+### Search preview and server edition
+
+The Index hero contains three prerendered examples from the same canonical snapshot: Ouroboros, Codex and OpenHands (with ranked fallbacks when an example leaves the corpus). `index-search-demo.js` animates only the demo query and prepared result cards; the real search input remains independent. Pause, offscreen/tab suspension and reduced-motion behavior are supported. No corpus manifest or evidence chunks are loaded on the landing page. `build-harness-monitor.cjs` also refreshes these examples and the shared compact autonomy key in all three views.
+
+`harness-server.html` is the minimal full-corpus edition: records, source/assessment information, search, autonomy filters, sorting and the short state key. It loads the lightweight manifest plus one content-addressed complete evidence bundle, renders every matching row without pagination, and filters/sorts locally without additional data requests. It is a static full-list view compatible with the existing Pages hosting and file previews. It shares the published-snapshot refresh mechanism with the paginated monitor.
+
+Server edition uses the autonomy icons as toggle filters. Basic selections match any of the six functions; Extended combines selected states within each function with OR and functions with AND. A, C, P, no-path, unknown, A(P) and C(P) are exact distinct states. Selections and Extended visibility are saved in the URL; Clear filters resets the query and state filters. The sticky console includes search and both filter levels. Above the main table, the latest published Opensiro assessment appears independently of search, alongside six entries ordered by their assessment Git revision time without an internal scroll area. Assessment links point to the pinned canonical revision. Fingerprints in these panels also toggle the corresponding function filter.
+
+Both monitor editions use the same centered autonomy legend dialog, with seven state tiles and a compact function key, keyboard dismissal and focus restoration. Parent-assisted P can apply to any function. The paginated monitor retains its table viewport and scroll position during snapshot refresh; Prev and Next sit together at the bottom right.
+
+The third Index poster includes a local SVG animation of feedback between the six VSM functions. Square pixel signals use different transit speeds, packet sizes and repetition intervals, with a separate infrequent upward pulse from S3 to S5. They run automatically, pause offscreen and in hidden tabs, and respect reduced motion. No corpus data is loaded for this illustration.
+
+S3 and S2 communicate along two separate one-way lanes with directional pixel packets. The S4-to-S2 preview route runs around the outer edge with sparse outlined packets.

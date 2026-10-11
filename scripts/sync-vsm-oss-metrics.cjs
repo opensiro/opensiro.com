@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const pagePath = path.join(root, 'vsm-index.html');
+const templatePath = path.join(root, 'scripts/templates/vsm-index-source.html');
+const pagePath = fs.existsSync(templatePath) ? templatePath : path.join(root, 'vsm-index.html');
 const START = '<!-- VSM OSS METRICS:START -->';
 const END = '<!-- VSM OSS METRICS:END -->';
 const INDEX_METRICS_END = '<!-- VSM INDEX METRICS:END -->';

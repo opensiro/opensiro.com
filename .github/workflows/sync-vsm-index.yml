@@ -9,6 +9,15 @@ on:
       - "scripts/sync-vsm-metrics.cjs"
       - "scripts/sync-vsm-oss-metrics.cjs"
       - "scripts/sync-index-preview.cjs"
+      - "scripts/build-harness-monitor.cjs"
+      - "scripts/templates/**"
+      - "index-search-demo.js"
+      - "index-vsm-flow.js"
+      - "index-posters.css"
+      - "harness-server.css"
+      - "autonomy-key.css"
+      - "harness-monitor.js"
+      - "harness-monitor.css"
       - "vsm-index-metrics.css"
       - "tests/static-site.test.cjs"
       - "tests/index-preview-sync.test.cjs"
@@ -121,6 +130,9 @@ jobs:
       - name: Sync home Index preview
         run: node scripts/sync-index-preview.cjs
 
+      - name: Build paginated harness monitor
+        run: node scripts/build-harness-monitor.cjs
+
       - name: Remove upstream checkout
         run: rm -rf .upstream
 
@@ -129,6 +141,7 @@ jobs:
           node --test
           tests/static-site.test.cjs
           tests/index-preview-sync.test.cjs
+          tests/harness-monitor.test.cjs
           tests/vsm-index-source-sync.test.cjs
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
@@ -136,7 +149,7 @@ jobs:
       - name: Verify sync changed only materialized pages
         shell: bash
         run: |
-          changed="$(git diff --name-only)"
+          changed="$(git diff --name-only; git ls-files --others --exclude-standard)"
           if [ -z "$changed" ]; then
             echo "Canonical source produced no site changes."
             exit 0
@@ -145,7 +158,7 @@ jobs:
           echo "Changed files:"
           printf '%s\n' "$changed"
 
-          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(index\.html|vsm-index\.html)$' || true)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(index\.html|vsm-index\.html|harness-server\.html|harness-monitor\.html|scripts/templates/vsm-index-source\.html|assets/harness-index/(manifest|(rows|all)-[a-f0-9]+)\.js)$' || true)"
           if [ -n "$unexpected" ]; then
             echo "Unexpected generated files:" >&2
             printf '%s\n' "$unexpected" >&2
@@ -156,7 +169,7 @@ jobs:
         id: commit
         shell: bash
         run: |
-          git add index.html vsm-index.html
+          git add index.html vsm-index.html harness-server.html harness-monitor.html scripts/templates/vsm-index-source.html assets/harness-index
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0

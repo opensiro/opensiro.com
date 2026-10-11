@@ -13,9 +13,10 @@ test('home Index preview follows the ranked table and stays reproducible', () =>
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'opensiro-index-preview-'));
   const scriptPath = path.join(fixture, 'scripts', 'sync-index-preview.cjs');
   const homePath = path.join(fixture, 'index.html');
-  const catalogPath = path.join(fixture, 'vsm-index.html');
+  const catalogPath = path.join(fixture, 'scripts/templates/vsm-index-source.html');
   fs.mkdirSync(path.dirname(scriptPath));
-  for (const file of ['index.html', 'vsm-index.html', 'scripts/sync-index-preview.cjs']) {
+  for (const file of ['index.html', 'scripts/templates/vsm-index-source.html', 'scripts/sync-index-preview.cjs']) {
+    fs.mkdirSync(path.dirname(path.join(fixture, file)), { recursive: true });
     fs.copyFileSync(path.join(root, file), path.join(fixture, file));
   }
 
