@@ -47,9 +47,9 @@ ${shortKey.replace(/<a href="vsm-index.html#state-key">Full key ↗<\/a>/,legend
 <nav class="monitor-pagination" aria-label="Harness pages"><span id="monitor-page">Page 1</span><button id="monitor-prev" type="button">← Previous</button><button id="monitor-next" type="button">Next →</button></nav>
 <noscript><p>Enable JavaScript to load paginated results, or <a href="https://github.com/opensiro/vsm-harness-index/blob/main/RANKINGS.md">read the canonical rankings</a>.</p></noscript>
 </section></div></main>`);
-monitor = monitor.replace(/<nav class="vhi-section-nav"[\s\S]*?<\/nav>/,'').replace(/<script src="vsm-index.js[^>]*><\/script>/,'<script src="harness-monitor.js?v=20261011-model-era" defer></script>').replace(/vsm-index.css\?v=[^"]+/,'vsm-index.css?v=20261011').replace('https://opensiro.com/vsm-index.html','https://opensiro.com/harness-monitor.html').replace('https://opensiro.com/vsm-index.html','https://opensiro.com/harness-monitor.html').replaceAll('opensiro / vsm harness index','opensiro / harness monitor').replace('class="vsm-index-page"','class="vsm-index-page harness-monitor-page"');
+monitor = monitor.replace(/<nav class="vhi-section-nav"[\s\S]*?<\/nav>/,'').replace(/<script src="vsm-index.js[^>]*><\/script>/,'<script src="harness-monitor.js?v=20261011-model-era-labels" defer></script>').replace(/vsm-index.css\?v=[^"]+/,'vsm-index.css?v=20261011').replace('https://opensiro.com/vsm-index.html','https://opensiro.com/harness-monitor.html').replace('https://opensiro.com/vsm-index.html','https://opensiro.com/harness-monitor.html').replaceAll('opensiro / vsm harness index','opensiro / harness monitor').replace('class="vsm-index-page"','class="vsm-index-page harness-monitor-page"');
 monitor = monitor.replace('<!-- Cache full harness names before app.js compacts repository labels. -->', '');
-monitor = monitor.replace('</head>','<link rel="stylesheet" href="autonomy-key.css?v=20261011-assessments">\n<link rel="stylesheet" href="harness-monitor.css?v=20261011-model-era">\n</head>');
+monitor = monitor.replace('</head>','<link rel="stylesheet" href="autonomy-key.css?v=20261011-assessments">\n<link rel="stylesheet" href="harness-monitor.css?v=20261011-model-era-labels">\n</head>');
 monitor = monitor.replace('</body>',`${legendWindow}\n</body>`);
 outputs.set('harness-monitor.html',monitor);
 let server = monitor
