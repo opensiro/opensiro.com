@@ -160,3 +160,60 @@
 .section-export,.poster-dark .section-export,.hero-poster .section-export,.poster>.wrap>.section-export,.os-hero>.wrap>.section-export,.os-section>.wrap>.section-export{position:static;display:inline;margin-left:7px;padding:0;border:0;background:transparent;backdrop-filter:none;font-size:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
 .section-export:hover,.section-export:focus-visible,.poster-dark .section-export:hover,.poster-dark .section-export:focus-visible{background:transparent;color:var(--accent-ink)}
 .poster-dark .section-export:hover,.poster-dark .section-export:focus-visible{color:var(--accent)}
+
+/* Proofstate: compact compositions with stable text widths on desktop. */
+@media (min-width:961px) and (min-height:600px){
+  .proofstate-page :is(.os-hero,.os-section){display:flex;align-items:center;min-height:var(--poster-height,calc(100dvh - var(--nav-h) - 51px));padding:24px 0;scroll-margin-top:var(--poster-header-height,var(--nav-h))}
+  .proofstate-page :is(.os-hero,.os-section)>.wrap{width:100%;max-width:1240px;zoom:var(--poster-scale,1)}
+  .proofstate-page #os-economics>.wrap{max-width:calc(1240px / var(--poster-scale,1))}
+  .proofstate-page .os-back-link{margin-bottom:18px}
+  .proofstate-page .os-product-line{padding-bottom:20px;margin-bottom:28px}
+  .proofstate-page h1{font-size:clamp(34px,4vw,56px)}
+  .proofstate-page h2{font-size:clamp(30px,3.2vw,42px)}
+  .proofstate-page .os-lead{max-width:62ch;margin-top:20px}
+  .proofstate-page .os-heading{margin-bottom:20px}
+  .proofstate-page .os-data-key{padding:10px 0;margin-bottom:10px}
+  .proofstate-page .os-cost-system{display:grid;grid-template-columns:200px minmax(0,1fr)}
+  .proofstate-page .os-run-clock{grid-column:1/-1;padding:8px 14px}
+  .proofstate-page .os-commit-deck{grid-column:1;border-bottom:0;border-right:1px solid var(--hairline-2)}
+  .proofstate-page .os-commit-deck>header{display:grid;gap:4px}
+  .proofstate-page .os-commit-history{grid-template-columns:1fr;gap:10px}
+  .proofstate-page .os-commit-card:not(:last-child)::after{left:24px;top:100%;width:0;height:11px;border-top:0;border-left:1px solid #9ab1d8}
+  .proofstate-page .os-commit-dispatch{flex-direction:column;gap:8px;text-align:center}
+  .proofstate-page .os-run-grid{grid-column:2}
+  .proofstate-page .os-model-lane>span,.proofstate-page .os-model-lane>em{gap:2px;line-height:1.25}
+  .proofstate-page .os-model-lane>span small{line-height:1.25}
+  .proofstate-page .os-run-panel>header div{gap:4px}
+  .proofstate-page .os-frontier-meter{padding:14px;gap:10px}
+  .proofstate-page .os-live-metrics .os-cite strong{font-size:17px}
+  .proofstate-page .os-source-line{margin-top:10px}
+
+  .proofstate-page .os-commit-deck{padding:12px 14px 0}
+  .proofstate-page .os-commit-deck>header{margin-bottom:10px}
+  .proofstate-page .os-commit-card{padding:10px}
+  .proofstate-page .os-commit-card>strong{margin-top:8px}
+  .proofstate-page .os-commit-dispatch{padding:10px 0}
+  .proofstate-page .os-run-grid{grid-template-columns:1.08fr .92fr}
+  .proofstate-page .os-run-panel+.os-run-panel{border-top:0;border-left:1px solid var(--hairline-2)}
+  .proofstate-page .os-run-panel>header{min-height:76px;padding:10px 14px}
+  .proofstate-page .os-run-origin{padding-top:10px;padding-bottom:10px}
+  .proofstate-page .os-sandbox,.proofstate-page .os-frontier-meter{margin:10px 14px}
+  .proofstate-page .os-sandbox-head{padding:8px 12px}
+  .proofstate-page .os-model-lane{min-height:42px;padding:6px 0}
+  .proofstate-page .os-live-metrics>div{padding:10px 12px}
+  .proofstate-page .os-run-panel>footer{min-height:72px;padding:10px 14px}
+  .proofstate-page .os-note{margin-top:12px}
+  .proofstate-page .os-workflow{grid-template-columns:minmax(0,1.65fr) minmax(300px,.72fr)}
+  .proofstate-page .os-frontier-zone{display:block;padding-top:34px}
+  .proofstate-page .os-frontier-zone ol{grid-template-columns:1fr}
+  .proofstate-page .os-frontier-zone li{display:grid}
+  .proofstate-page .os-frontier-zone li:not(:last-child)::after{content:"↓";right:auto;top:auto;left:17px;bottom:-9px}
+  .proofstate-page .os-criteria li{padding:12px 18px}
+  .proofstate-page .os-distinction{padding:18px}
+  .proofstate-page .os-distinction>div{margin-top:14px;padding:14px}
+  .proofstate-page .os-scope-grid article{padding:20px}
+  .proofstate-page .os-scope-grid ul{margin-top:18px}
+  .proofstate-page .os-scope-grid li{padding:8px 0}
+  .proofstate-page .os-benchmark-surfaces>*{padding:16px}
+  .proofstate-page .os-benchmark-surfaces h3{margin-top:16px}
+}

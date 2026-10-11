@@ -114,3 +114,7 @@ The focused square variant (`logo/opensiro-square-focused.svg` and PNG sizes 256
 The square logo also has a matching vector file:
 `logo/opensiro-square-256.svg` is copied from logo-factory `opensiro_ro.svg`,
 renamed to share the 1:1 PNG stem and sized to a 256 × 256 SVG viewport.
+
+## OpenAI Agents SDK mark
+
+`logo/openai-agents-sdk.svg` uses the OpenAI mark from the [official Agents SDK documentation](https://openai.github.io/openai-agents-python/assets/logo.svg), with transparent outer margins cropped and a dark monochrome fill for the light Layers panel. This third-party mark belongs to OpenAI.
