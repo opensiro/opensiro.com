@@ -26,6 +26,33 @@ const browser=await chromium.launch({...(process.env.CHROMIUM_EXECUTABLE ? {exec
 try {
 const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const root=require('node:path').resolve(__dirname,'..');require('node:fs').mkdirSync(root+'/work',{recursive:true});const url=pathToFileURL(root+'/harness-monitor.html').href;
+// The home preview keeps every key visible in a second, indented mobile row.
+for(const width of [320,360,390,430,540,680,1366]) {
+await page.setViewportSize({width,height:844});
+await page.goto(pathToFileURL(root+'/index.html').href);
+await page.evaluate(()=>document.fonts.ready);
+assert.equal(await page.locator('.index-preview-table tbody tr').count(),4);
+if(width<=680) {
+const rows=await page.locator('.index-preview-table tbody tr').evaluateAll(elements=>elements.map(row=>{
+const bounds=row.getBoundingClientRect(),name=row.querySelector('th').getBoundingClientRect();
+return {left:bounds.left,right:bounds.right,nameLeft:name.left,nameBottom:name.bottom,keys:[...row.querySelectorAll('.home-state')].map(key=>{
+const rect=key.getBoundingClientRect();return {left:rect.left,right:rect.right,top:rect.top};
+}),labels:[...row.querySelectorAll('td')].map(cell=>getComputedStyle(cell,'::before').content)};
+}));
+for(const row of rows) {
+assert.equal(row.keys.length,6);
+assert.ok(row.keys.every(key=>key.top>row.nameBottom && key.left>=row.left && key.right<=row.right),'home preview keys fit below the name');
+assert.ok(row.keys[0].left>row.nameLeft+16,'home preview fingerprint is indented');
+assert.deepEqual(row.labels,['"S1"','"S2"','"S3"','"S3*"','"S4"','"S5"']);
+}
+assert.ok(await page.locator('.home-table-scroll').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'home preview needs no horizontal scrolling');
+} else {
+assert.equal(await page.locator('.index-preview-table table').evaluate(e=>getComputedStyle(e).display),'table','desktop preview keeps the table');
+}
+await page.locator('#index').scrollIntoViewIfNeeded();
+await page.screenshot({path:root+`/work/home-index-${width}.png`});
+}
+await page.setViewportSize({width:1366,height:768});
 await page.goto(url);await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===20);
 await page.locator('#monitor-next').click();await page.waitForFunction(()=>document.querySelector('#monitor-status').textContent.startsWith('21–40'));
 await page.locator('#monitor-size').selectOption('100');await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===100);
