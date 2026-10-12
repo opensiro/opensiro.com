@@ -1,6 +1,26 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const {pathToFileURL}=require('node:url');
 const assert=require('node:assert/strict');
+async function assertMobileRows(page) {
+  const geometry=await page.locator('#harness-table tbody tr').evaluateAll(rows=>rows.map(row=>{
+    const bounds=row.getBoundingClientRect(), name=row.querySelector('th').getBoundingClientRect(), model=row.querySelector('.assessment-model').getBoundingClientRect();
+    return {nameLeft:name.left,nameBottom:name.bottom,left:bounds.left,right:bounds.right,model:{left:model.left,right:model.right,top:model.top},
+      keys:[...row.querySelectorAll('.vhi-state')].map(key=>{
+        const rect=key.getBoundingClientRect();
+        return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};
+      }), references:row.querySelectorAll('.review-ref a,.assessment-ref a').length};
+  }));
+  assert.ok(geometry.length,'mobile rows loaded');
+  for (const row of geometry) {
+    assert.equal(row.keys.length,6,'all six autonomy keys remain present');
+    assert.equal(row.references,2,'source and assessment links remain present');
+    assert.ok(row.keys.every(key=>key.left>=row.left && key.right<=row.right),'all keys fit inside the row');
+    assert.ok(row.keys.every(key=>key.top>row.nameBottom),'keys appear below the harness identity');
+    assert.ok(row.keys[0].left>row.nameLeft+16,'fingerprint is indented to the right');
+    assert.ok(row.model.left>=row.left && row.model.right<=row.right && row.model.top>row.keys[0].bottom,'assessment model remains visible below the fingerprint');
+  }
+  assert.ok(await page.locator('.vhi-table-wrap').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'mobile results need no horizontal scrolling');
+}
 (async()=>{
 const browser=await chromium.launch({...(process.env.CHROMIUM_EXECUTABLE ? {executablePath:process.env.CHROMIUM_EXECUTABLE} : {}),headless:true,args:['--no-sandbox']});
 try {
@@ -11,10 +31,11 @@ await page.locator('#monitor-next').click();await page.waitForFunction(()=>docum
 await page.locator('#monitor-size').selectOption('100');await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===100);
 await page.locator('#monitor-query').fill('atmosphere');await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===1);
 await page.locator('#monitor-clear').click();await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===100);
-await page.locator('#monitor-filter').selectOption('full');await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===1);
-for (const [w,h] of [[1366,768],[390,844]]) {
+await page.locator('#monitor-filter').selectOption('full');await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===Math.min(Number(document.querySelector('#monitor-size').value),window.harnessSnapshot.entries.filter(entry=>entry.a===6).length));
+for (const [w,h] of [[1366,768],[320,844],[390,844],[680,844]]) {
 await page.setViewportSize({width:w,height:h});
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'monitor page width');
+if(w<=680)await assertMobileRows(page);
 await page.screenshot({path:root+`/work/harness-monitor-${w}.png`,fullPage:true});
 await page.goto(pathToFileURL(root+'/vsm-index.html').href);
 assert.equal(await page.locator('.index-poster').count(),3);
@@ -59,7 +80,7 @@ assert.equal(await page.locator('[data-flow-toggle]').count(),0);
 assert.equal(await signal.evaluate(e=>getComputedStyle(e).filter),'none');
 await page.emulateMedia({reducedMotion:'reduce'});
 assert.equal(await signal.evaluate(e=>getComputedStyle(e).animationName),'none');
-for (const [w,h] of [[1366,768],[390,844]]) {
+for (const [w,h] of [[1366,768],[320,844],[390,844],[680,844]]) {
 await page.setViewportSize({width:w,height:h});
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
 await page.locator('[data-vsm-flow]').scrollIntoViewIfNeeded();
@@ -75,20 +96,34 @@ assert.equal(await page.locator('#monitor-metrics').count(),0);
 assert.equal(await page.locator('#monitor-filter').isVisible(),false);
 assert.equal(await page.locator('#monitor-size').isVisible(),false);
 assert.equal(await page.locator('.monitor-pagination').isVisible(),false);
+assert.equal(await page.locator('#server-console-nav').evaluate(nav=>nav.open),false,'server console is closed by default');
+assert.equal(await page.locator('#monitor-query').isVisible(),false);
+await page.locator('.server-console-summary').click();
+assert.equal(await page.locator('#monitor-query').isVisible(),true);
 const latestCard=await page.locator('#server-latest-assessment').innerHTML();
 assert.ok(await page.locator('#server-latest-assessment .server-assessment-link').getAttribute('href'));
 await page.locator('#monitor-query').fill('codex');
 await page.waitForFunction(()=>window.harnessSnapshot && document.querySelector('#harness-table tbody').rows.length===window.harnessSnapshot.entries.filter(e=>(e.name+' '+e.repository).toLowerCase().includes('codex')).length);
 assert.equal(await page.locator('#server-latest-assessment').innerHTML(),latestCard);
+const filteredCount=await page.locator('#harness-table tbody tr').count();
+await page.locator('.server-console-summary').click();
+assert.equal(await page.locator('#monitor-query').isVisible(),false);
+assert.equal(await page.locator('#harness-table tbody tr').count(),filteredCount,'collapse retains matching rows');
+await page.locator('.server-console-summary').focus();
+await page.keyboard.press('Enter');
+assert.equal(await page.locator('#monitor-query').inputValue(),'codex','keyboard expansion retains the query');
 await page.locator('#monitor-clear').click();
 await page.waitForFunction(()=>document.querySelector('#harness-table tbody').rows.length===window.harnessSnapshot.entries.length);
 await page.locator('[data-sort-index="2"]').click();
 await page.waitForFunction(()=>document.querySelector('#harness-table').getAttribute('aria-busy')==='false');
 const dates=await page.locator('#harness-table tbody time').allTextContents();
 assert.deepEqual(dates,[...dates].sort().reverse());
-for (const [w,h] of [[1366,768],[390,844]]) {
+await page.locator('.server-console-summary').click();
+for (const [w,h] of [[1366,768],[320,844],[390,844],[680,844]]) {
 await page.setViewportSize({width:w,height:h});
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'server page width');
+assert.ok(await page.locator('#server-console-nav').evaluate(nav=>nav.getBoundingClientRect().height<=70),'collapsed console leaves room for the table');
+if(w<=680)await assertMobileRows(page);
 await page.screenshot({path:root+`/work/harness-server-${w}.png`,fullPage:true});
 }
 await page.setViewportSize({width:1366,height:768});
@@ -97,6 +132,7 @@ await page.waitForFunction(()=>window.harnessSnapshot && document.querySelector(
 assert.equal(await page.locator('.server-filter-strip .server-key').count(),7);
 assert.equal(await page.locator('.server-latest-item').count(),6);
 assert.equal(await page.locator('.server-latest-item .server-key').count(),36);
+await page.locator('.server-console-summary').click();
 const basic=page.locator('.server-filter-strip [data-server-state="A(P)"]');
 await basic.click();
 await page.waitForFunction(()=>document.querySelector('#harness-table').getAttribute('aria-busy')==='false');
@@ -114,6 +150,8 @@ assert.ok(page.url().includes('s0=A'));
 await page.reload();
 await page.waitForFunction(()=>document.querySelector('#harness-table').getAttribute('aria-busy')==='false' && window.harnessSnapshot);
 assert.equal(await page.locator('#server-extended-toggle').getAttribute('aria-expanded'),'true');
+assert.equal(await page.locator('#server-console-nav').evaluate(nav=>nav.open),false,'reload starts collapsed even with active filters');
+await page.locator('.server-console-summary').click();
 await page.locator('#monitor-query').fill('codex');
 await page.waitForFunction(()=>new URLSearchParams(location.search).get('q')==='codex' && document.querySelector('#harness-table').getAttribute('aria-busy')==='false');
 assert.equal(await page.locator('#server-latest-assessment .server-key').count(),6);
@@ -122,7 +160,7 @@ await page.waitForFunction(()=>document.querySelector('#harness-table tbody').ro
 assert.equal(await page.locator('#server-latest-assessment').innerHTML(),latestCard);
 await page.evaluate(()=>window.scrollTo(0,1000));
 assert.equal(await page.locator('#server-console-nav').evaluate(nav=>Math.round(nav.getBoundingClientRect().top)),0);
-for (const [w,h] of [[1366,768],[390,844]]) {
+for (const [w,h] of [[1366,768],[320,844],[390,844],[680,844]]) {
 await page.setViewportSize({width:w,height:h});await page.evaluate(()=>window.scrollTo(0,0));
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'extended server page width');
 await page.screenshot({path:root+`/work/harness-server-filters-${w}.png`,fullPage:true});
@@ -143,7 +181,8 @@ for (const file of ['harness-monitor.html','harness-server.html']) {
 await page.goto(pathToFileURL(root+'/'+file).href);
 await page.waitForFunction(()=>window.harnessSnapshot && document.querySelector('#harness-table').getAttribute('aria-busy')==='false');
 assert.equal(await page.locator('#monitor-uptime').count(),0);
-for (const [w,h] of [[1366,768],[390,844]]) {
+if(file==='harness-server.html')await page.locator('.server-console-summary').click();
+for (const [w,h] of [[1366,768],[320,844],[390,844],[680,844]]) {
 await page.setViewportSize({width:w,height:h});
 const open=page.locator('[data-autonomy-legend-open]').first();
 await open.click();

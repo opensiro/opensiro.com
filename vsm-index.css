@@ -48,3 +48,17 @@
 .vhi-search p{margin:9px 0 0}
 .vhi-table tr[hidden]{display:none}
 @media(max-width:760px){.vhi-search input{font-size:16px}}
+
+/* Keep row names visible while browsing all columns on a phone. */
+@media(max-width:680px){
+  .vhi-table-wrap{overscroll-behavior-y:auto}
+  .vhi-table{min-width:760px}
+  .vhi-table th,.vhi-table td{padding:8px}
+  .vhi-table thead th:first-child,.vhi-table tbody th{width:128px;padding-left:10px}
+  .vhi-table tbody th>a{max-width:110px;font-size:10px}
+  .vhi-table thead th:nth-child(2){width:94px}
+  .vhi-table thead th:nth-child(3){width:84px}
+  .vhi-table thead th:nth-child(4){width:80px}
+  .vhi-table thead th:nth-child(n+5){width:44px}
+  .vhi-table .state-cell{padding:6px!important}
+}
