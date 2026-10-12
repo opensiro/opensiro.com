@@ -677,3 +677,23 @@
  .vsm-section-nav .wrap{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
  .vsm-section-nav a{padding:13px 12px;font-size:.68rem;scroll-snap-align:center}
 }
+
+/* Mobile posters use the available width instead of clipping desktop tracks. */
+@media(max-width:680px){
+  .hero-poster>.wrap{width:100%;min-width:0}
+  .hero-poster h1{font-size:clamp(38px,13vw,74px)}
+  .poster-head{grid-template-columns:minmax(0,1fr);gap:16px;margin-bottom:32px}
+  .poster-head>*,.problem-head>*,.process-head>*,.use-heading>*{min-width:0}
+  .poster-head h2,.process-head h2,.use-heading h2{font-size:clamp(32px,10vw,52px);overflow-wrap:anywhere}
+  .problem-head{grid-template-columns:minmax(0,1fr)}
+  .problem-head h2{font-size:clamp(32px,10.5vw,56px)}
+  .poster-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  .poster-actions .btn{min-width:0;white-space:normal;text-align:center}
+  .vsmlite-category{grid-template-columns:minmax(0,1fr)}
+  .vsmlite-category>div+div{border-left:0;border-top:1px solid #7990b7}
+  .model-beer .model-node{min-width:40px;min-height:36px}
+  .architecture-console{grid-template-columns:minmax(0,1fr)}
+  .architecture-controls,.architecture-figure,.architecture-switches{min-width:0}
+  .architecture-readout{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .architecture-readout strong,.architecture-readout span{overflow-wrap:anywhere}
+}
