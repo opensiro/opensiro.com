@@ -71,6 +71,7 @@ jobs:
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
           tests/source-snapshot-sync.test.cjs
+          tests/served-snapshot-attestation.test.cjs
 
       - name: Validate canonical Index snapshot provenance
         run: node scripts/snapshot-provenance.cjs --check
@@ -95,3 +96,11 @@ jobs:
         uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages-${{ github.run_attempt }}
+
+      # Only content-changing/manual deploys need a live served-SHA gate.
+      # Scheduled maintainer-card refreshes do not advance the Index source.
+      - name: Attest served Index snapshot after Pages deployment
+        if: github.event_name != 'schedule'
+        env:
+          DEPLOYED_PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/verify-served-index-manifest.cjs
