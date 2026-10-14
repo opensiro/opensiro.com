@@ -1,0 +1,23 @@
+name: Validate site publication provenance
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sync-vsm-index.yml"
+      - ".github/workflows/static.yml"
+      - ".github/workflows/validate-site-publication.yml"
+      - "scripts/verify-served-index-manifest.cjs"
+      - "tests/served-snapshot-attestation.test.cjs"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test served-manifest attestation
+        run: node --test tests/served-snapshot-attestation.test.cjs
+      - name: Verify canonical generated snapshot provenance
+        run: node scripts/snapshot-provenance.cjs --check

@@ -94,6 +94,18 @@ jobs:
           echo "VSM_INDEX_SOURCE_REF=$(git -C .upstream/vsm-harness-index rev-parse HEAD)" >> "$GITHUB_ENV"
           echo "VSM_INDEX_SOURCE_UPDATED_AT=$(git -C .upstream/vsm-harness-index show -s --format=%cI HEAD)" >> "$GITHUB_ENV"
 
+      - name: Record owning Organization renderer revision
+        shell: bash
+        run: |
+          owner_ref="$(git -C .upstream/vsm-oss-organization rev-parse HEAD)"
+          echo "VSM_ORGANIZATION_SOURCE_REF=$owner_ref" >> "$GITHUB_ENV"
+          echo "Owner Organization renderer: $owner_ref"
+          {
+            echo "### Materialization source provenance"
+            echo "- Index: \`$VSM_INDEX_SOURCE_REF\`"
+            echo "- Organization renderer: \`$owner_ref\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Ignore duplicate Index events already materialized
         id: preflight
         shell: bash
@@ -205,6 +217,7 @@ jobs:
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
           tests/source-snapshot-sync.test.cjs
+          tests/served-snapshot-attestation.test.cjs
 
       - name: Verify sync changed only materialized pages
         if: steps.preflight.outputs.skip != 'true'
