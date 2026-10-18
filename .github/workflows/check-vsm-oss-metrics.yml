@@ -23,6 +23,7 @@ on:
       - "tests/static-site.test.cjs"
       - "tests/index-preview-sync.test.cjs"
       - "tests/vsm-index-source-sync.test.cjs"
+      - "tests/source-snapshot-sync.test.cjs"
       - "tests/vsm-index-metrics-sync.test.cjs"
       - "tests/vsm-oss-metrics-sync.test.cjs"
 
