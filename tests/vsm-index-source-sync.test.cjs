@@ -67,6 +67,33 @@ test('VSM index renders included assessments from canonical source inputs', () =
     assert.doesNotMatch(page, />fixture &#8599;<\/a>/, 'global Index snapshot ref must not be reused as the assessment ref');
     assert.equal((page.match(/class="assessment-ref"/g) || []).length, 4);
     assert.equal(run('--check').status, 0);
+
+    // Index #55: a storage-only shallow sharding move must not make every
+    // historical assessment look newly revised. Old SHA + old path stays valid.
+    fs.mkdirSync(path.join(source, 'assessments', 'al'), { recursive: true });
+    fs.mkdirSync(path.join(source, 'assessments', 'be'), { recursive: true });
+    git(source, 'mv', 'assessments/alpha.md', 'assessments/al/alpha.md');
+    git(source, 'mv', 'assessments/beta.md', 'assessments/be/beta.md');
+    git(source, 'commit', '-qm', 'shard assessments without changing contents');
+    const migrationRef = git(source, 'rev-parse', 'HEAD');
+    assert.equal(run().status, 0);
+    let movedPage = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
+    assert.ok(movedPage.includes(`/blob/${alphaRef}/assessments/alpha.md`));
+    assert.ok(movedPage.includes(`/blob/${betaRef}/assessments/beta.md`));
+    assert.ok(!movedPage.includes(`/blob/${migrationRef}/assessments/al/alpha.md`));
+    assert.ok(!movedPage.includes(`/blob/${migrationRef}/assessments/be/beta.md`));
+
+    // A later real assessment edit must point at its new location and commit.
+    fs.appendFileSync(path.join(source, 'assessments', 'be', 'beta.md'), '\n<!-- substantive revision -->\n');
+    git(source, 'add', 'assessments/be/beta.md');
+    git(source, 'commit', '-qm', 'revise beta in sharded layout');
+    const betaNewRef = git(source, 'rev-parse', 'HEAD');
+    assert.equal(run().status, 0);
+    movedPage = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
+    assert.ok(movedPage.includes(`/blob/${alphaRef}/assessments/alpha.md`));
+    assert.ok(movedPage.includes(`/blob/${betaNewRef}/assessments/be/beta.md`));
+    assert.ok(!movedPage.includes(`/blob/${migrationRef}/assessments/be/beta.md`));
+    assert.equal(run('--check').status, 0);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

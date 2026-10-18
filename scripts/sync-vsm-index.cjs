@@ -63,11 +63,15 @@ function listMarkdownFiles(dir) {
 function assessmentRefsByPath() {
   let history;
   try {
-    history = execFileSync('git', ['-C', sourceRoot, 'log', '--format=@@%H|%cI', '--name-only', '--', 'assessments'], { encoding: 'utf8' });
+    // A byte-identical R100 directory migration must not reset provenance for
+    // every assessment. -M emits rename pairs so we can follow prior paths.
+    history = execFileSync('git', ['-C', sourceRoot, 'log', '-M', '--format=@@%H|%cI', '--name-status', '--', 'assessments'], { encoding: 'utf8' });
   } catch (error) {
     throw new Error(`Could not read assessment history from ${sourceRoot}: ${error.message}`);
   }
   const refs = new Map();
+  // As we walk newest to oldest, map an older path to its current identity.
+  const aliases = new Map();
   let commit = null, updatedAt = null;
   for (const rawLine of history.split(/\r?\n/)) {
     const line = rawLine.trim();
@@ -76,7 +80,24 @@ function assessmentRefsByPath() {
       [commit, updatedAt] = line.slice(2).split('|');
       continue;
     }
-    if (commit && line.startsWith('assessments/') && line.endsWith('.md') && !refs.has(line)) refs.set(line, {ref:commit, updatedAt});
+    if (!commit) continue;
+    const fields = line.split('\t');
+    const status = fields[0];
+    if (status.startsWith('R') && fields.length === 3) {
+      const [, olderPath, newerPath] = fields;
+      const currentPath = aliases.get(newerPath) || newerPath;
+      aliases.set(olderPath, currentPath);
+      if (status !== 'R100' && !refs.has(currentPath)) {
+        // A rename that also edits contents is itself a substantive revision.
+        refs.set(currentPath, {ref:commit, updatedAt, linkPath:newerPath});
+      }
+      continue;
+    }
+    if (fields.length !== 2 || status.startsWith('D')) continue;
+    const pathAtCommit = fields[1];
+    if (!pathAtCommit.startsWith('assessments/') || !pathAtCommit.endsWith('.md')) continue;
+    const currentPath = aliases.get(pathAtCommit) || pathAtCommit;
+    if (!refs.has(currentPath)) refs.set(currentPath, {ref:commit, updatedAt, linkPath:pathAtCommit});
   }
   return refs;
 }
@@ -181,7 +202,9 @@ for (const file of listMarkdownFiles(assessmentsDir)) {
   const history = assessmentRefs.get(assessmentPath);
   const assessmentRef = history?.ref;
   if (!assessmentRef) throw new Error(`Missing Git history for included assessment: ${assessmentPath}`);
-  assessments.set(id, { id, meta, states, assessmentPath, assessmentRef, assessmentUpdatedAt:history.updatedAt });
+  // Link to the source path at the last content change. After a pure move,
+  // the original old-path pinned GitHub URL remains valid and meaningful.
+  assessments.set(id, { id, meta, states, assessmentPath, assessmentLinkPath:history.linkPath, assessmentRef, assessmentUpdatedAt:history.updatedAt });
 }
 
 const rankingText = requiredFile(path.join(sourceRoot, 'RANKINGS.md'));
@@ -208,7 +231,7 @@ const records = rankingIds.map((id) => {
   const year = (catalog.repository_created_at || '').slice(0, 4) || '—';
   const a = assessment.states.filter((item) => stateBase(item.state) === 'A').length;
   const c = assessment.states.filter((item) => stateBase(item.state) === 'C').length;
-  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath, assessmentRef: assessment.assessmentRef, assessmentUpdatedAt:assessment.assessmentUpdatedAt };
+  return { id, repository, reviewRef, reviewedAt, projectName, year, a, c, states: assessment.states, assessmentPath: assessment.assessmentPath, assessmentLinkPath: assessment.assessmentLinkPath, assessmentRef: assessment.assessmentRef, assessmentUpdatedAt:assessment.assessmentUpdatedAt };
 });
 
 function recordLink(record) {
@@ -221,7 +244,7 @@ function reviewLink(record) {
 }
 
 function assessmentLink(record) {
-  const href = `${sourceRepository}/blob/${encodeURIComponent(record.assessmentRef)}/${record.assessmentPath.split('/').map(encodeURIComponent).join('/')}`;
+  const href = `${sourceRepository}/blob/${encodeURIComponent(record.assessmentRef)}/${record.assessmentLinkPath.split('/').map(encodeURIComponent).join('/')}`;
   return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" title="Open assessment at commit ${escapeHtml(record.assessmentRef)}">${escapeHtml(record.assessmentRef.slice(0, 7))} &#8599;</a>`;
 }
 
