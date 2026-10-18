@@ -95,7 +95,12 @@ test('Henterprise reassessment matches canonical Index after source-driven regen
   const indexSha=execFileSync('git',['-C',sourceRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
   const provenance=JSON.parse(fs.readFileSync(path.join(root,'assets/harness-index/source-manifest.json'),'utf8'));
   assert.equal(provenance.source_sha,indexSha,'site snapshot must match checkout Index main');
-  const assessment=fs.readFileSync(path.join(sourceRoot,'assessments/henterprise.md'),'utf8');
+  // Index #55 changes storage paths without changing the assessed evidence.
+  // Require exactly one canonical file under the legacy or shallow shard path.
+  const candidates=['assessments/henterprise.md','assessments/he/henterprise.md'];
+  const existing=candidates.filter(file=>fs.existsSync(path.join(sourceRoot,file)));
+  assert.equal(existing.length,1,'Henterprise source must exist exactly once in flat or sharded layout');
+  const assessment=fs.readFileSync(path.join(sourceRoot,existing[0]),'utf8');
   assert.match(assessment,/^review_ref: 193e8fdac0d17abf833ab68e5179b273a6084e4c$/m);
   for(const key of ['s1','s2','s3','s3_star','s4','s5']) assert.match(assessment,new RegExp('^autonomy_'+key+': A$','m'));
   const found=snapshot().entries.find(e=>e.repository==='https://github.com/humbertobellor/henterprise');
@@ -104,7 +109,12 @@ test('Henterprise reassessment matches canonical Index after source-driven regen
   assert.equal(found.a,6);
   assert.equal(found.c,0);
   assert.match(found.ref,/193e8fd/);
-  assert.match(found.assessment,/https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/[a-f0-9]{40}\/assessments\/henterprise\.md/);
+  const pinned=found.assessment.match(/^https:\/\/github\.com\/opensiro\/vsm-harness-index\/blob\/([a-f0-9]{40})\/(assessments\/(?:he\/)?henterprise\.md)$/);
+  assert.ok(pinned,'Henterprise must link to a historical pinned assessment path');
+  // The pure git-mv must retain a valid pinned source object, not replace it
+  // with a link that only looks syntactically correct.
+  const pinnedSource=execFileSync('git',['-C',sourceRoot,'show',`${pinned[1]}:${pinned[2]}`],{encoding:'utf8'});
+  assert.equal(pinnedSource,assessment,'Pinned Git evidence must match the current canonical assessment bytes');
   const all=fs.readFileSync(path.join(root,'assets/harness-index',snapshot().fullFile),'utf8');
   assert.match(all,/humbertobellor\/henterprise/);
   for (const file of ['harness-monitor.html','harness-server.html']) {
