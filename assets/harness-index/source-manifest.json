@@ -1,10 +1,10 @@
 {
   "source_repository": "opensiro/vsm-harness-index",
   "source_branch": "main",
-  "source_sha": "57aa14a01fa8d654c56b4ed201a061289b3b685f",
-  "source_url": "https://github.com/opensiro/vsm-harness-index/tree/57aa14a01fa8d654c56b4ed201a061289b3b685f",
-  "snapshot_revision": "3e6176683dfb32b1",
-  "source_updated_at": "2026-10-19T14:40:14.000Z",
-  "included_assessments": 586,
-  "all_rows_file": "all-7a882803e3bf0099.js"
+  "source_sha": "bfede1fd8de687d8624ecd4c31f96162115f65d0",
+  "source_url": "https://github.com/opensiro/vsm-harness-index/tree/bfede1fd8de687d8624ecd4c31f96162115f65d0",
+  "snapshot_revision": "a0948d2e52da2e1a",
+  "source_updated_at": "2026-10-19T20:29:30.000Z",
+  "included_assessments": 593,
+  "all_rows_file": "all-fe1f9b28ef2c17aa.js"
 }
