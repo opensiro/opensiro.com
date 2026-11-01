@@ -32,6 +32,15 @@ test('Index commit events are independent of website pushes, with hourly reconci
   assert.match(site,/Verify sync changed only materialized pages/);
 });
 
+test('both site pipelines satisfy the six-repository Organization metrics collector contract', () => {
+  for (const workflow of ['sync-vsm-index.yml', 'check-vsm-oss-metrics.yml']) {
+    const source = fs.readFileSync(path.join(root, '.github/workflows', workflow), 'utf8');
+    assert.match(source, /repository: opensiro\/upstream\s+ref: main\s+path: \.upstream\/upstream\s+fetch-depth: 0/);
+    assert.match(source, /--upstream-root \.upstream\/upstream/);
+    assert.match(source, /--organization-root \.upstream\/vsm-oss-organization/);
+  }
+});
+
 test('duplicate events skip, while unrelated website changes do not determine Index freshness', () => {
   assert.equal(decide({trigger:'repository_dispatch',notifiedRepo:canonical,notifiedSha:one,sourceSha:one,publishedSha:one}).skip,true);
   assert.equal(decide({trigger:'repository_dispatch',notifiedRepo:canonical,notifiedSha:one,sourceSha:two,publishedSha:one}).skip,false);
