@@ -89,6 +89,14 @@ jobs:
           path: .upstream/awesome-vsm-harness
           fetch-depth: 0
 
+      - name: Checkout Upstream Contributions
+        uses: actions/checkout@v4
+        with:
+          repository: opensiro/upstream
+          ref: main
+          path: .upstream/upstream
+          fetch-depth: 0
+
       - name: Record canonical source revision and freshness
         shell: bash
         run: |
@@ -154,6 +162,7 @@ jobs:
           --skills-root .upstream/vsm-harness-skills
           --index-root .upstream/vsm-harness-index
           --awesome-root .upstream/awesome-vsm-harness
+          --upstream-root .upstream/upstream
           --organization-root .upstream/vsm-oss-organization
           --output .upstream/vsm-oss-metrics.json
 
