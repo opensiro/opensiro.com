@@ -1,0 +1,27 @@
+name: Check Upstream operational PR page
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/check-upstream-portfolio.yml'
+      - '.github/workflows/sync-upstream-portfolio.yml'
+      - '.github/workflows/static.yml'
+      - 'scripts/sync-upstream-portfolio.cjs'
+      - 'tests/upstream-portfolio-sync.test.cjs'
+      - 'upstream-portfolio.html'
+      - 'assets/upstream-portfolio-observation.json'
+      - 'index.html'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Offline source-contract, rendering and local-link tests
+        run: node --test tests/upstream-portfolio-sync.test.cjs tests/static-site.test.cjs

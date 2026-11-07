@@ -1,0 +1,105 @@
+name: Sync source-dated Upstream PR portfolio
+
+on:
+  schedule:
+    - cron: '11 5 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-upstream-portfolio.yml'
+      - 'scripts/sync-upstream-portfolio.cjs'
+      - 'tests/upstream-portfolio-sync.test.cjs'
+      - 'upstream-portfolio.html'
+
+permissions:
+  contents: write
+  actions: write
+
+# Shares the site materialization lock with canonical Index synchronization.
+# These jobs write disjoint generated site outputs but must not race on main.
+concurrency:
+  group: 'vsm-index-sync'
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout latest site main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+      - name: Checkout Upstream S1 source owner
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: opensiro/upstream
+          ref: main
+          path: .upstream/upstream
+          persist-credentials: false
+      - name: Record exact source SHA
+        shell: bash
+        run: echo "UPSTREAM_SOURCE_SHA=$(git -C .upstream/upstream rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate authoritative PR cohort
+        run: python3 .upstream/upstream/scripts/portfolio_reconcile.py --validate-only
+      - name: Observe public external PR states once
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python3 .upstream/upstream/scripts/portfolio_reconcile.py
+          --report --output-json .upstream/upstream-observation.json
+          >> "$GITHUB_STEP_SUMMARY"
+      - name: Materialize separate operational website view
+        run: >-
+          node scripts/sync-upstream-portfolio.cjs
+          --source .upstream/upstream-observation.json
+          --upstream-sha "$UPSTREAM_SOURCE_SHA"
+      - name: Validate snapshot and site without a network dependency
+        run: node --test tests/upstream-portfolio-sync.test.cjs tests/static-site.test.cjs
+      - name: Fail if Upstream main changed during observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote https://github.com/opensiro/upstream.git refs/heads/main | cut -f1)"
+          if [ "$latest" != "$UPSTREAM_SOURCE_SHA" ]; then
+            echo "Upstream source advanced during observation: $UPSTREAM_SOURCE_SHA -> $latest" >&2
+            exit 1
+          fi
+      - name: Remove source checkout before file-scope check
+        run: rm -rf .upstream
+      - name: Confirm only operational website outputs changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only; git ls-files --others --exclude-standard)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(upstream-portfolio\.html|assets/upstream-portfolio-observation\.json)$' || true)"
+          if [ -n "$unexpected" ]; then
+            printf 'Unexpected generated paths:\n%s\n' "$unexpected" >&2
+            exit 1
+          fi
+          git diff --check
+      - name: Commit only reviewed source-dated site outputs
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add upstream-portfolio.html assets/upstream-portfolio-observation.json
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: sync Upstream external PR status snapshot'
+          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - name: Deploy verified new snapshot
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run static.yml --ref main

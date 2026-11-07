@@ -70,6 +70,7 @@ jobs:
           tests/vsm-index-source-sync.test.cjs
           tests/vsm-index-metrics-sync.test.cjs
           tests/vsm-oss-metrics-sync.test.cjs
+          tests/upstream-portfolio-sync.test.cjs
           tests/source-snapshot-sync.test.cjs
           tests/served-snapshot-attestation.test.cjs
 

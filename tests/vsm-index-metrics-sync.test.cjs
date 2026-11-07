@@ -86,3 +86,38 @@ test('VSM index falls back to snapshot_date when source commit time is unavailab
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('achieved 1000 corpus milestone does not invent a next target', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'opensiro-vsm-metrics-achieved-'));
+  const source = path.join(dir, '.upstream', 'vsm-harness-index');
+  const script = path.join(dir, 'scripts', 'sync-vsm-metrics.cjs');
+  put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-metrics.cjs'), 'utf8'));
+  put(path.join(dir, 'vsm-index.html'), '<html><head></head><body><section class="vhi-combos"></section></body></html>');
+  const metricsPath = path.join(source, 'data', 'metrics.json');
+  const payload = {
+    schema_version: 1,
+    snapshot_date: '2026-11-05',
+    corpus: { included_assessments: 1055, catalog_entries: 1143, reassessment_events: 88, full_a_assessments: 2 },
+    active_contract: { profile_version: '0.2.4', methodology_version: '0.3.7' },
+    milestones: [100, 250, 500, 1000].map(target => ({ target, status: 'achieved',
+      completed: 1055, progress_fraction: 1 }))
+  };
+  put(metricsPath, JSON.stringify(payload));
+  const run = () => spawnSync(process.execPath, [script, '--source', source], { cwd: dir, encoding: 'utf8' });
+  try {
+    const successful = run();
+    assert.equal(successful.status, 0, successful.stderr);
+    const page = fs.readFileSync(path.join(dir, 'vsm-index.html'), 'utf8');
+    assert.match(page, /1000 achieved/);
+    assert.match(page, /1055 included · no next target set/);
+    assert.doesNotMatch(page, /Next milestone/);
+
+    payload.milestones[3].status = 'planned';
+    put(metricsPath, JSON.stringify(payload));
+    const invalid = run();
+    assert.notEqual(invalid.status, 0);
+    assert.match(invalid.stderr, /not all published corpus milestones are achieved/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

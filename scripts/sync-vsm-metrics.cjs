@@ -73,11 +73,39 @@ if (!Array.isArray(metrics.milestones)) throw new Error('Missing milestones in d
 
 const updatedAt = formatUpdatedAt(process.env.VSM_INDEX_SOURCE_UPDATED_AT || metrics.snapshot_date);
 const next = metrics.milestones.find((row) => row && row.status === 'next');
-if (!next) throw new Error('Missing next corpus milestone in data/metrics.json');
-const nextTarget = requireNumber(next.target, 'milestones.next.target');
-const nextCompleted = requireNumber(next.completed, 'milestones.next.completed');
-const progressFraction = requireNumber(next.progress_fraction, 'milestones.next.progress_fraction');
-const progress = Math.min(progressFraction * 100, 100);
+let milestone;
+let milestoneLog;
+if (next) {
+  const target = requireNumber(next.target, 'milestones.next.target');
+  const completed = requireNumber(next.completed, 'milestones.next.completed');
+  const progressFraction = requireNumber(next.progress_fraction, 'milestones.next.progress_fraction');
+  const progress = Math.min(progressFraction * 100, 100);
+  milestone = `<div class="vhi-milestone" aria-label="Next corpus milestone: ${completed} of ${target}">
+      <div class="vhi-milestone-copy"><span>Next milestone</span><strong>${completed} / ${target}</strong><span>${progress.toFixed(1)}%</span></div>
+      <div class="vhi-milestone-track" aria-hidden="true"><span style="width:${progress.toFixed(1)}%"></span></div>
+    </div>`;
+  milestoneLog = `next milestone ${target}`;
+} else {
+  // Once Index has achieved every published target, inventing a successor is
+  // not allowed. Show the last attained checkpoint and current corpus size.
+  const achieved = metrics.milestones.filter((row) => row && row.status === 'achieved');
+  if (!achieved.length || achieved.length !== metrics.milestones.length) {
+    throw new Error('No next milestone, but not all published corpus milestones are achieved');
+  }
+  for (const row of achieved) {
+    const target = requireNumber(row.target, 'milestones.achieved.target');
+    const completed = requireNumber(row.completed, 'milestones.achieved.completed');
+    if (completed < target || row.progress_fraction !== 1 || completed !== included) {
+      throw new Error('Invalid achieved corpus milestone in data/metrics.json');
+    }
+  }
+  const lastTarget = Math.max(...achieved.map(row => row.target));
+  milestone = `<div class="vhi-milestone" aria-label="All published corpus milestones achieved">
+      <div class="vhi-milestone-copy"><span>Latest achieved milestone</span><strong>${lastTarget} achieved</strong><span>${included} included · no next target set</span></div>
+      <div class="vhi-milestone-track" aria-hidden="true"><span style="width:100%"></span></div>
+    </div>`;
+  milestoneLog = `all published milestones achieved (latest ${lastTarget})`;
+}
 
 const section = `${START}
   <section class="vhi-metrics" aria-labelledby="vhi-metrics-title">
@@ -91,10 +119,7 @@ const section = `${START}
       <div><dt>Reassessments</dt><dd>${reassessments}</dd></div>
       <div><dt>Full-A</dt><dd>${fullA}</dd></div>
     </dl>
-    <div class="vhi-milestone" aria-label="Next corpus milestone: ${nextCompleted} of ${nextTarget}">
-      <div class="vhi-milestone-copy"><span>Next milestone</span><strong>${nextCompleted} / ${nextTarget}</strong><span>${progress.toFixed(1)}%</span></div>
-      <div class="vhi-milestone-track" aria-hidden="true"><span style="width:${progress.toFixed(1)}%"></span></div>
-    </div>
+    ${milestone}
     <p class="vhi-metrics-contract">Profile ${escapeHtml(contract.profile_version)} / Methodology ${escapeHtml(contract.methodology_version)}</p>
   </section>
 ${END}`;
@@ -126,9 +151,9 @@ if (checkOnly) {
     console.error(`VSM metrics are stale against ${metricsPath}. Run node scripts/sync-vsm-metrics.cjs --source ${sourceRoot}`);
     process.exitCode = 1;
   } else {
-    console.log(`VSM metrics are current: ${included} included assessments; next milestone ${nextTarget}.`);
+    console.log(`VSM metrics are current: ${included} included assessments; ${milestoneLog}.`);
   }
 } else {
   if (updated !== original) fs.writeFileSync(pagePath, updated);
-  console.log(`Synced VSM metrics: ${included} included assessments; next milestone ${nextTarget}.`);
+  console.log(`Synced VSM metrics: ${included} included assessments; ${milestoneLog}.`);
 }
