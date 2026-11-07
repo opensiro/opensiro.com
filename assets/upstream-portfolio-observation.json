@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-11-07T14:07:00+00:00",
+  "cohort_sha256": "9ec745b1a73ce49ece1bea7b3c3ac844bb9bfe80bfe2dbc74c48a2819d472adf",
+  "records": [
+    {
+      "url": "https://github.com/BESSER-PEARL/BESSER-Agentic-Framework/pull/205",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/Coral-Bricks-AI/reef/pull/19",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/CorticalComputer/Spartan/pull/1",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/Gen-Verse/DiscoveryRSI/pull/2",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/Gen-Verse/Recuris/pull/2",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/GoogleCloudPlatform/scion/pull/2047",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "closed_unmerged",
+      "closure": {
+        "actor": "ptone",
+        "closed_event_at": "2026-09-28T23:13:22Z",
+        "evidence": "GITHUB_CLOSED_EVENT"
+      }
+    },
+    {
+      "url": "https://github.com/LEO001020/pi-loop-studio-orchestra/pull/1",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/Onipounds/agent-loop/pull/1",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/Phoenixrr2113/agent-harness/pull/1",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/Rohith-s-hub/Oblivion-agent/pull/1",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/SethGammon/Citadel/pull/366",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/Szotasz/marveen/pull/1516",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/androoAGI/starnet/pull/56",
+      "groups": [
+        "casebook",
+        "watchlist"
+      ],
+      "outcome": "closed_unmerged",
+      "closure": {
+        "actor": "xLagerFeuer",
+        "closed_event_at": "2026-10-24T15:33:07Z",
+        "evidence": "GITHUB_CLOSED_EVENT"
+      }
+    },
+    {
+      "url": "https://github.com/cbrock84/headcount/pull/47",
+      "groups": [
+        "casebook",
+        "watchlist"
+      ],
+      "outcome": "unverifiable",
+      "reason": "VERIFIED_KNOWN_404"
+    },
+    {
+      "url": "https://github.com/chankov/agent-fleet/pull/43",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/chumingjun/dsh-harness-one/pull/173",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/cordfuse/politik/pull/33",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/first-fluke/oh-my-agent/pull/819",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "closed_unmerged",
+      "closure": {
+        "actor": "xLagerFeuer",
+        "closed_event_at": "2026-09-28T18:29:00Z",
+        "evidence": "GITHUB_CLOSED_EVENT"
+      }
+    },
+    {
+      "url": "https://github.com/huleidada/matterloop/pull/11",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/humbertobellor/henterprise/pull/1",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "closed_unmerged",
+      "closure": {
+        "actor": "xLagerFeuer",
+        "closed_event_at": "2026-10-11T21:10:27Z",
+        "evidence": "GITHUB_CLOSED_EVENT"
+      }
+    },
+    {
+      "url": "https://github.com/humbertobellor/henterprise/pull/3",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/mila-iqia/babyai/pull/128",
+      "groups": [
+        "watchlist"
+      ],
+      "outcome": "open"
+    },
+    {
+      "url": "https://github.com/shep-ai/shep/pull/933",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/shep-ai/shep/pull/934",
+      "groups": [
+        "casebook"
+      ],
+      "outcome": "merged"
+    },
+    {
+      "url": "https://github.com/topoteretes/cognee-community/pull/434",
+      "groups": [
+        "registry",
+        "watchlist"
+      ],
+      "outcome": "open"
+    }
+  ],
+  "upstream_source_sha": "6a8f93dc3ef61fafb93e896ed600a8839c25ed41"
+}
