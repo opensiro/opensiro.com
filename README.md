@@ -8,6 +8,12 @@ hairline dividers, and pale blue artwork with darker blue link accents. The home
 work in plain language; each product has its own animated pixel mark.
 Built as plain HTML/CSS/JS, with no runtime dependencies.
 
+The [external PR lifecycle page](upstream-portfolio.html) presents an
+independently source-dated operational Upstream watchlist; it does **not** claim
+verified external product adoption or revive deprecated Product-native fit.
+Its daily GitHub-to-static-site sync, guardrails and first-publication checks
+are documented in [UPSTREAM_PORTFOLIO_SYNC.md](docs/UPSTREAM_PORTFOLIO_SYNC.md).
+
 ## Stack
 
 Plain static site — **no build step, no dependencies, no framework.** All fonts and mascot artwork are bundled locally and loaded from `assets/`.
