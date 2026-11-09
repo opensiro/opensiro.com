@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-11-08T11:54:57+00:00",
+  "observed_at": "2026-11-09T13:52:01+00:00",
   "cohort_sha256": "9ec745b1a73ce49ece1bea7b3c3ac844bb9bfe80bfe2dbc74c48a2819d472adf",
   "records": [
     {
@@ -203,5 +203,5 @@
       "outcome": "open"
     }
   ],
-  "upstream_source_sha": "9d069557901c39f06e16da100b7521ff1a39cae8"
+  "upstream_source_sha": "3b600378622f397667f80f1b685e6f953dc2ea7f"
 }
