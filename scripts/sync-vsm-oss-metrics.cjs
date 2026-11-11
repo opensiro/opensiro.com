@@ -200,19 +200,25 @@ if (updated.includes(START) || updated.includes(END)) {
 }
 
 
-// The full Organization metrics template is source-only and excluded from Pages.
-// Keep a small independently source-verified entry on the *served* Index page.
+// The source-only HTML template is omitted from Pages. Add just a bounded
+// source-linked summary to the served page without violating its 18 KB budget.
 const servedPage = path.join(root, 'vsm-index.html');
 const servedOriginal = pagePath === servedPage ? updated : requiredFile(servedPage);
-const publicSection = `${PUBLIC_START}
-<section class="index-poster index-upstream-poster" id="upstream-verified" aria-labelledby="upstream-verified-title"><div class="wrap">
-  <p class="eyebrow">04 / UPSTREAM CONTRIBUTIONS</p>
-  <h2 id="upstream-verified-title">What made it upstream?</h2>
-  <p class="index-lede">Only source-verified changes merged by external maintainers count here. They are not deployment or measured user benefit.</p>
-  ${outcomeEvidence || '<p>Verified merged changes: evidence-gated; no count is claimed.</p>'}
-  <p><a href="upstream-portfolio.html">See all external PR statuses</a> · <a href="https://github.com/opensiro/vsm-oss-organization/blob/main/docs/METRICS.md">Source and counting rules</a></p>
-</div></section>
-${PUBLIC_END}`;
+const outcome = snapshot.repositories['opensiro/upstream'] &&
+  snapshot.repositories['opensiro/upstream'].metrics.verified_external_outcomes;
+const compactEvidence = outcomeEvidence ? (
+  '<p id="upstream-verified">Verified merged changes: <strong>'
+  + escapeHtml(String(outcome.value)) + '</strong> (not measured benefit). '
+  + outcome.accepted.slice(0, 2).map((record) => {
+    const parts = record.external_pr_url.split('/');
+    return '<a href="' + escapeHtml(record.external_pr_url) + '">'
+      + escapeHtml(parts[4] + ' #' + parts[6]) + '</a> '
+      + '<a href="' + escapeHtml(record.native_receipt) + '">CI</a>';
+  }).join(' · ')
+  + ' · <a href="upstream-portfolio.html">All PRs</a></p>'
+) : '<p id="upstream-verified">Verified merges: evidence-gated. '
+  + '<a href="upstream-portfolio.html">Other PR states</a></p>';
+const publicSection = PUBLIC_START + '\n' + compactEvidence + '\n' + PUBLIC_END;
 let servedUpdated;
 if (servedOriginal.includes(PUBLIC_START) || servedOriginal.includes(PUBLIC_END)) {
   if (servedOriginal.split(PUBLIC_START).length !== 2
