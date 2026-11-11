@@ -102,16 +102,37 @@ jobs:
       - name: Materialize canonical Index corpus metrics locally
         run: node scripts/sync-vsm-metrics.cjs --source .upstream/vsm-harness-index
 
+      - name: Revalidate Upstream accepted merged changes via first-party GitHub API
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          if python .upstream/upstream/scripts/verified_external_outcomes.py --report --output-json .upstream/upstream-observed.json &&
+             python .upstream/upstream/scripts/accepted_external_outcomes.py --observation-json .upstream/upstream-observed.json --output-json .upstream/upstream-accepted.json >/dev/null; then
+            echo "Source-owned first-party Upstream evidence validated."
+          else
+            rm -f .upstream/upstream-observed.json .upstream/upstream-accepted.json
+            echo "::warning::Live external evidence unavailable; outcome metric stays unclaimed."
+          fi
+
       - name: Collect canonical public VSM OSS snapshot
-        run: >-
-          python .upstream/vsm-oss-organization/scripts/collect_public_metrics.py
-          --profile-root .upstream/vsm-harness-profile
-          --skills-root .upstream/vsm-harness-skills
-          --index-root .upstream/vsm-harness-index
-          --awesome-root .upstream/awesome-vsm-harness
-          --upstream-root .upstream/upstream
-          --organization-root .upstream/vsm-oss-organization
-          --output .upstream/vsm-oss-metrics.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          accepted=()
+          if [ -f .upstream/upstream-accepted.json ]; then
+            accepted+=(--upstream-accepted .upstream/upstream-accepted.json)
+          fi
+          python .upstream/vsm-oss-organization/scripts/collect_public_metrics.py \
+            --profile-root .upstream/vsm-harness-profile \
+            --skills-root .upstream/vsm-harness-skills \
+            --index-root .upstream/vsm-harness-index \
+            --awesome-root .upstream/awesome-vsm-harness \
+            --upstream-root .upstream/upstream \
+            --organization-root .upstream/vsm-oss-organization \
+            --output .upstream/vsm-oss-metrics.json \
+            "${accepted[@]}"
 
       - name: Finalize canonical historical windows
         run: >-
