@@ -79,6 +79,50 @@ if (snapshot.publication.engineering_activity_is_productivity_kpi !== false) {
   throw new Error('Engineering activity must remain non-KPI');
 }
 
+function verifiedUpstreamEvidence(snapshot) {
+  const owner = snapshot.repositories['opensiro/upstream'];
+  const outcome = owner && owner.metrics && owner.metrics.verified_external_outcomes;
+  if (!outcome || outcome.value == null) return '';
+  const records = outcome.accepted;
+  if (!Number.isSafeInteger(outcome.value) || outcome.value < 0
+      || outcome.claim_status !== 'verified_merged_changes_only_not_deployed_benefit'
+      || outcome.completion_gate_evaluated !== true
+      || !Array.isArray(records) || records.length !== outcome.value
+      || typeof outcome.observed_at !== 'string'
+      || !/^(?:20\d\d)-\d\d-\d\dT/.test(outcome.observed_at)
+      || !/^[a-f0-9]{64}$/.test(outcome.owner_source_sha256 || '')
+      || !/^[a-f0-9]{64}$/.test(outcome.portfolio_cohort_sha256 || '')) {
+    throw new Error('Invalid source-verified Upstream outcome contract');
+  }
+  const seenIds = new Set();
+  const seenPrs = new Set();
+  const links = records.map((record) => {
+    if (!record || typeof record.intervention_id !== 'string' || !record.intervention_id
+        || !/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/pull\/[1-9]\d*$/.test(record.external_pr_url || '')
+        || !/^https:\/\/github\.com\/opensiro\/upstream\/(?:actions\/runs\/[1-9]\d*|blob\/[a-f0-9]{40}\/[^?#]+)$/.test(record.native_receipt || '')
+        || !/^[a-f0-9]{40}$/.test(record.merge_commit_sha || '')
+        || record.decision !== 'ACCEPTED_MERGED_CHANGE_ONLY'
+        || record.acceptance_basis !== 'DETERMINISTIC_VERIFIED_MERGE'
+        || record.benefit_claim !== 'NOT_MEASURED'
+        || seenIds.has(record.intervention_id)
+        || seenPrs.has(record.external_pr_url.toLowerCase())) {
+      throw new Error('Invalid or duplicated Upstream merged-change evidence');
+    }
+    seenIds.add(record.intervention_id);
+    seenPrs.add(record.external_pr_url.toLowerCase());
+    const short = record.external_pr_url.replace('https://github.com/', '');
+    return '<li><a href="' + escapeHtml(record.external_pr_url) + '">'
+      + escapeHtml(short) + '</a> · <a href="'
+      + escapeHtml(record.native_receipt) + '">native CI receipt</a></li>';
+  }).join('\n');
+  return '<details class="vhi-org-semantics"><summary>'
+    + escapeHtml(String(outcome.value))
+    + ' source-verified merged changes · inspect evidence</summary>'
+    + '<p>Accepted contributor merges only, not deployment or measured user benefit. '
+    + 'Observed ' + escapeHtml(outcome.observed_at) + '.</p>'
+    + '<ul>' + links + '</ul></details>';
+}
+
 const windows = ['24h', '7d', '30d'];
 const rows = snapshot.scope.map((repo) => {
   const entry = snapshot.repositories[repo];
@@ -104,11 +148,12 @@ const activityRows = snapshot.scope.map((repo) => {
 }).join('\n');
 
 const collected = typeof snapshot.collected_at === 'string' ? snapshot.collected_at.slice(0, 10) : '—';
+const outcomeEvidence = verifiedUpstreamEvidence(snapshot);
 const section = `${START}
   <section class="vhi-org-metrics" aria-labelledby="vhi-org-metrics-title">
     <header class="vhi-metrics-head vhi-org-metrics-head">
       <div><h2 id="vhi-org-metrics-title">Public VSM OSS activity</h2><p>Repository-owned state and net canonical change. Updated ${escapeHtml(collected)}.</p></div>
-      <a href="https://github.com/opensiro/vsm-oss-organization/blob/main/METRICS.md" target="_blank" rel="noopener">Metrics contract &#8599;</a>
+      <a href="https://github.com/opensiro/vsm-oss-organization/blob/main/docs/METRICS.md" target="_blank" rel="noopener">Metrics contract &#8599;</a>
     </header>
     <div class="vhi-org-table-wrap" tabindex="0" role="region" aria-label="Public VSM OSS canonical state change">
       <table class="vhi-org-table">
@@ -119,6 +164,7 @@ ${rows}
       </table>
     </div>
     <p class="vhi-org-semantics">Window values are net canonical-state change, not gross event counts. Unlike outputs are never summed into a productivity score.</p>
+    ${outcomeEvidence}
     <details class="vhi-engineering-activity">
       <summary>Engineering activity <span>non-KPI</span></summary>
       <div class="vhi-org-table-wrap">
