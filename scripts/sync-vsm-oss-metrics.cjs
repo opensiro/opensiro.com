@@ -9,6 +9,8 @@ const pagePath = fs.existsSync(templatePath) ? templatePath : path.join(root, 'v
 const START = '<!-- VSM OSS METRICS:START -->';
 const END = '<!-- VSM OSS METRICS:END -->';
 const INDEX_METRICS_END = '<!-- VSM INDEX METRICS:END -->';
+const PUBLIC_START = '<!-- VERIFIED UPSTREAM:START -->';
+const PUBLIC_END = '<!-- VERIFIED UPSTREAM:END -->';
 const stylesheetVersion = 'vsm-index-metrics.css?v=20260922-vsm-oss';
 
 function argValue(name) {
@@ -197,8 +199,43 @@ if (updated.includes(START) || updated.includes(END)) {
   updated = updated.replace(INDEX_METRICS_END, `${INDEX_METRICS_END}\n${section}`);
 }
 
+
+// The source-only HTML template is omitted from Pages. Add just a bounded
+// source-linked summary to the served page without violating its 18 KB budget.
+const servedPage = path.join(root, 'vsm-index.html');
+const servedOriginal = pagePath === servedPage ? updated : requiredFile(servedPage);
+const outcome = snapshot.repositories['opensiro/upstream'] &&
+  snapshot.repositories['opensiro/upstream'].metrics.verified_external_outcomes;
+const compactEvidence = outcomeEvidence ? (
+  '<p id="upstream-verified">Verified merged changes: <strong>'
+  + escapeHtml(String(outcome.value)) + '</strong> (not measured benefit). '
+  + outcome.accepted.slice(0, 2).map((record) => {
+    const parts = record.external_pr_url.split('/');
+    return '<a href="' + escapeHtml(record.external_pr_url) + '">'
+      + escapeHtml(parts[4] + ' #' + parts[6]) + '</a>';
+  }).join(' · ')
+  + ' · <a href="upstream-portfolio.html">All PRs</a></p>'
+) : '<p id="upstream-verified">Verified merges: evidence-gated. '
+  + '<a href="upstream-portfolio.html">Other PR states</a></p>';
+const publicSection = PUBLIC_START + '\n' + compactEvidence + '\n' + PUBLIC_END;
+let servedUpdated;
+if (servedOriginal.includes(PUBLIC_START) || servedOriginal.includes(PUBLIC_END)) {
+  if (servedOriginal.split(PUBLIC_START).length !== 2
+      || servedOriginal.split(PUBLIC_END).length !== 2
+      || servedOriginal.indexOf(PUBLIC_START) > servedOriginal.indexOf(PUBLIC_END)) {
+    throw new Error('Missing or duplicate public Upstream markers');
+  }
+  servedUpdated = servedOriginal.replace(
+    new RegExp(PUBLIC_START + '[\\s\\S]*?' + PUBLIC_END), publicSection);
+} else {
+  if (servedOriginal.split('</main>').length !== 2
+      || !servedOriginal.includes('<main id="main-content"')) {
+    throw new Error('Missing unique publicly served Index insertion point');
+  }
+  servedUpdated = servedOriginal.replace('</main>', publicSection + '\n</main>');
+}
 if (checkOnly) {
-  if (updated !== original) {
+  if (updated !== original || servedUpdated !== servedOriginal) {
     console.error(`VSM OSS metrics are stale against ${sourcePath}. Run node scripts/sync-vsm-oss-metrics.cjs --source ${sourcePath}`);
     process.exitCode = 1;
   } else {
@@ -206,5 +243,6 @@ if (checkOnly) {
   }
 } else {
   if (updated !== original) fs.writeFileSync(pagePath, updated);
+  if (servedUpdated !== servedOriginal) fs.writeFileSync(servedPage, servedUpdated);
   console.log(`Synced VSM OSS metrics for ${snapshot.scope.length} repository surfaces.`);
 }
