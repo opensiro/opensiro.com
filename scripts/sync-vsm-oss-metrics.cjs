@@ -9,6 +9,8 @@ const pagePath = fs.existsSync(templatePath) ? templatePath : path.join(root, 'v
 const START = '<!-- VSM OSS METRICS:START -->';
 const END = '<!-- VSM OSS METRICS:END -->';
 const INDEX_METRICS_END = '<!-- VSM INDEX METRICS:END -->';
+const PUBLIC_START = '<!-- VERIFIED UPSTREAM:START -->';
+const PUBLIC_END = '<!-- VERIFIED UPSTREAM:END -->';
 const stylesheetVersion = 'vsm-index-metrics.css?v=20260922-vsm-oss';
 
 function argValue(name) {
@@ -197,8 +199,38 @@ if (updated.includes(START) || updated.includes(END)) {
   updated = updated.replace(INDEX_METRICS_END, `${INDEX_METRICS_END}\n${section}`);
 }
 
+
+// The full Organization metrics template is source-only and excluded from Pages.
+// Keep a small independently source-verified entry on the *served* Index page.
+const servedPage = path.join(root, 'vsm-index.html');
+const servedOriginal = requiredFile(servedPage);
+const publicSection = `${PUBLIC_START}
+<section class="index-poster index-upstream-poster" id="upstream-verified" aria-labelledby="upstream-verified-title"><div class="wrap">
+  <p class="eyebrow">04 / UPSTREAM CONTRIBUTIONS</p>
+  <h2 id="upstream-verified-title">What made it upstream?</h2>
+  <p class="index-lede">Only source-verified changes merged by external maintainers count here. They are not deployment or measured user benefit.</p>
+  ${outcomeEvidence || '<p>Verified merged changes: evidence-gated; no count is claimed.</p>'}
+  <p><a href="upstream-portfolio.html">See all external PR statuses</a> · <a href="https://github.com/opensiro/vsm-oss-organization/blob/main/docs/METRICS.md">Source and counting rules</a></p>
+</div></section>
+${PUBLIC_END}`;
+let servedUpdated;
+if (servedOriginal.includes(PUBLIC_START) || servedOriginal.includes(PUBLIC_END)) {
+  if (servedOriginal.split(PUBLIC_START).length !== 2
+      || servedOriginal.split(PUBLIC_END).length !== 2
+      || servedOriginal.indexOf(PUBLIC_START) > servedOriginal.indexOf(PUBLIC_END)) {
+    throw new Error('Missing or duplicate public Upstream markers');
+  }
+  servedUpdated = servedOriginal.replace(
+    new RegExp(PUBLIC_START + '[\\s\\S]*?' + PUBLIC_END), publicSection);
+} else {
+  if (servedOriginal.split('</main>').length !== 2
+      || !servedOriginal.includes('<main id="main-content"')) {
+    throw new Error('Missing unique publicly served Index insertion point');
+  }
+  servedUpdated = servedOriginal.replace('</main>', publicSection + '\n</main>');
+}
 if (checkOnly) {
-  if (updated !== original) {
+  if (updated !== original || servedUpdated !== servedOriginal) {
     console.error(`VSM OSS metrics are stale against ${sourcePath}. Run node scripts/sync-vsm-oss-metrics.cjs --source ${sourcePath}`);
     process.exitCode = 1;
   } else {
@@ -206,5 +238,6 @@ if (checkOnly) {
   }
 } else {
   if (updated !== original) fs.writeFileSync(pagePath, updated);
+  if (servedUpdated !== servedOriginal) fs.writeFileSync(servedPage, servedUpdated);
   console.log(`Synced VSM OSS metrics for ${snapshot.scope.length} repository surfaces.`);
 }
