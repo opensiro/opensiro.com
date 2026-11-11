@@ -212,8 +212,7 @@ const compactEvidence = outcomeEvidence ? (
   + outcome.accepted.slice(0, 2).map((record) => {
     const parts = record.external_pr_url.split('/');
     return '<a href="' + escapeHtml(record.external_pr_url) + '">'
-      + escapeHtml(parts[4] + ' #' + parts[6]) + '</a> '
-      + '<a href="' + escapeHtml(record.native_receipt) + '">CI</a>';
+      + escapeHtml(parts[4] + ' #' + parts[6]) + '</a>';
   }).join(' · ')
   + ' · <a href="upstream-portfolio.html">All PRs</a></p>'
 ) : '<p id="upstream-verified">Verified merges: evidence-gated. '
