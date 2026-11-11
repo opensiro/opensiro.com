@@ -34,7 +34,7 @@ test('VSM Index renders organization-owned VSM OSS activity without calculating 
   const script = path.join(dir, 'scripts', 'sync-vsm-oss-metrics.cjs');
   const source = path.join(dir, 'vsm-oss-metrics.json');
   put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-oss-metrics.cjs'), 'utf8'));
-  put(path.join(dir, 'vsm-index.html'), '<!doctype html><html><head></head><body><main><!-- VSM INDEX METRICS:START --><section>index</section><!-- VSM INDEX METRICS:END --><section class="vhi-combos">table</section></main></body></html>');
+  put(path.join(dir, 'vsm-index.html'), '<!doctype html><html><head></head><body><main id="main-content"><!-- VSM INDEX METRICS:START --><section>index</section><!-- VSM INDEX METRICS:END --><section class="vhi-combos">table</section></main></body></html>');
 
   const scope = [
     'opensiro/vsm-harness-profile',
@@ -112,6 +112,8 @@ test('VSM Index renders organization-owned VSM OSS activity without calculating 
     assert.match(page, /href="https:\/\/github.com\/chankov\/agent-fleet\/pull\/43"/);
     assert.match(page, /href="https:\/\/github.com\/SethGammon\/Citadel\/pull\/366"/);
     assert.match(page, /2 source-verified merged changes/);
+    assert.match(page, /id="upstream-verified"/);
+    assert.match(page, /See all external PR statuses/);
     assert.match(page, /not deployment or measured user benefit/);
     assert.match(page, /blob\/main\/docs\/METRICS.md/);
     assert.match(page, /Engineering activity <span>non-KPI<\/span>/);
@@ -129,7 +131,7 @@ test('renderer rejects snapshots that promote engineering activity to KPI', () =
   const script = path.join(dir, 'scripts', 'sync-vsm-oss-metrics.cjs');
   const source = path.join(dir, 'snapshot.json');
   put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-oss-metrics.cjs'), 'utf8'));
-  put(path.join(dir, 'vsm-index.html'), '<html><body><!-- VSM INDEX METRICS:END --></body></html>');
+  put(path.join(dir, 'vsm-index.html'), '<html><body><main id="main-content"><!-- VSM INDEX METRICS:END --></main></body></html>');
   put(source, JSON.stringify({ scope: ['opensiro/x'], repositories: {}, publication: { window_change_semantics: 'net canonical state change, not gross event count', engineering_activity_is_productivity_kpi: true } }));
   try {
     const run = spawnSync(process.execPath, [script, '--source', source], { cwd: dir, encoding: 'utf8' });
