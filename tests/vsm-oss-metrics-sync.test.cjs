@@ -95,7 +95,7 @@ test('VSM Index renders organization-owned VSM OSS activity without calculating 
         '24h': { status: 'unclaimed_semantic_evidence', value: null },
         '7d': { status: 'unclaimed_semantic_evidence', value: null },
         '30d': { status: 'unclaimed_semantic_evidence', value: null }
-      }, [65, 295, 295],
+      }, [65, 295, 295]),
       [scope[5]]: upstream
     }
   }, null, 2));
