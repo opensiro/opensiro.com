@@ -113,7 +113,7 @@ test('VSM Index renders organization-owned VSM OSS activity without calculating 
     assert.match(page, /href="https:\/\/github.com\/SethGammon\/Citadel\/pull\/366"/);
     assert.match(page, /2 source-verified merged changes/);
     assert.match(page, /id="upstream-verified"/);
-    assert.match(page, /See all external PR statuses/);
+    assert.match(page, /All PRs/);
     assert.match(page, /not deployment or measured user benefit/);
     assert.match(page, /blob\/main\/docs\/METRICS.md/);
     assert.match(page, /Engineering activity <span>non-KPI<\/span>/);
@@ -147,7 +147,7 @@ test('rendered merged-change evidence rejects benefit inflation or mutable recei
   const script = path.join(dir, 'scripts', 'sync-vsm-oss-metrics.cjs');
   const source = path.join(dir, 'snapshot.json');
   put(script, fs.readFileSync(path.join(root, 'scripts', 'sync-vsm-oss-metrics.cjs'), 'utf8'));
-  put(path.join(dir, 'vsm-index.html'), '<html><body><!-- VSM INDEX METRICS:END --></body></html>');
+  put(path.join(dir, 'vsm-index.html'), '<html><body><main id="main-content"><!-- VSM INDEX METRICS:END --></main></body></html>');
   const row = repo('verified_external_outcomes', 1, {
     '24h': { status: 'source_unavailable_at_baseline', value: null },
     '7d': { status: 'source_unavailable_at_baseline', value: null },
