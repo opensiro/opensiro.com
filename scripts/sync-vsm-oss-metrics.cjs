@@ -203,7 +203,7 @@ if (updated.includes(START) || updated.includes(END)) {
 // The full Organization metrics template is source-only and excluded from Pages.
 // Keep a small independently source-verified entry on the *served* Index page.
 const servedPage = path.join(root, 'vsm-index.html');
-const servedOriginal = requiredFile(servedPage);
+const servedOriginal = pagePath === servedPage ? updated : requiredFile(servedPage);
 const publicSection = `${PUBLIC_START}
 <section class="index-poster index-upstream-poster" id="upstream-verified" aria-labelledby="upstream-verified-title"><div class="wrap">
   <p class="eyebrow">04 / UPSTREAM CONTRIBUTIONS</p>
