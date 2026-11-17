@@ -33,18 +33,13 @@
 @media(max-width:760px){.index-history-heading{align-items:start;flex-direction:column;gap:22px}.index-history-age{max-width:none;padding-left:18px}.index-history-timeline{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}.index-history-cases{grid-template-columns:1fr}.index-history-cases article,.index-history-cases article+article{padding:18px 0;border-left:0}.index-history-cases article+article{border-top:1px solid var(--hairline-2)}.index-history-case-top{min-height:55px}.index-history-bridge{grid-template-columns:1fr 30px 1fr;gap:10px;padding:18px 14px}}
 @media(max-width:440px){.index-history-literature span{display:block;margin:8px 0 0}.index-history-timeline b{font-size:20px}.index-history-timeline span{font-size:11px}.index-history-bridge{font-size:14px}.index-history-arrow{font-size:24px}}
 
-/* Present-day practice adopts the same case strips, typographic hierarchy, and SVG grammar. */
+/* Current cases use exactly the same three-column grammar as historical cases. */
 .index-history-current{margin-top:42px}
-.index-history-current-intro{display:flex;align-items:end;justify-content:space-between;gap:32px;margin-bottom:23px}
-.index-history-current-intro .eyebrow{margin:0 0 13px}
-.index-history-current-intro h3{font-size:clamp(29px,3.3vw,42px);line-height:1.15;letter-spacing:-.055em;font-weight:normal;margin:0}
-.index-history-current-intro>p{font-size:11px;line-height:1.75;color:var(--muted);max-width:350px;margin:0}
-.index-history-cases-current{grid-template-columns:repeat(4,minmax(0,1fr))}
-.index-history-cases-current .index-history-case-top{min-height:72px}
-.index-history-cases-current .index-history-case-top span{font-size:9px;line-height:1.5;max-width:135px}
-.index-history-cases-current h3{font-size:clamp(15px,1.6vw,19px);min-height:48px}
-.index-history-cases-current p{font-size:11px;line-height:1.6;min-height:36px}
-.index-history-current-note{font-size:10px;line-height:1.75;color:var(--muted);margin:13px 0 0}
-@media(max-width:900px){.index-history-cases-current{grid-template-columns:repeat(2,minmax(0,1fr))}.index-history-cases-current article:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--hairline-2)}.index-history-cases-current article:nth-child(4){border-top:1px solid var(--hairline-2)}}
-@media(max-width:760px){.index-history-cases-current{grid-template-columns:repeat(2,minmax(0,1fr))}.index-history-cases-current article:nth-child(2){border-left:1px solid var(--hairline-2);padding-left:22px;border-top:0}.index-history-cases-current article:nth-child(4){border-left:1px solid var(--hairline-2);padding-left:22px}.index-history-current-intro{align-items:start;flex-direction:column;gap:14px}}
-@media(max-width:520px){.index-history-cases-current{grid-template-columns:1fr}.index-history-cases-current article,.index-history-cases-current article:nth-child(n){border-left:0;padding:18px 0}.index-history-cases-current article+article,.index-history-cases-current article:nth-child(n+2){border-top:1px solid var(--hairline-2)}.index-history-cases-current h3,.index-history-cases-current p{min-height:0}}
+.index-history-current>h3{font-size:clamp(29px,3.3vw,42px);font-weight:normal;line-height:1.2;letter-spacing:-.055em;margin:0 0 24px}
+.index-history-cases-current .index-history-case-top{min-height:64px}
+.index-history-cases-current .index-history-case-top span{font-size:10px;line-height:1.45;max-width:170px}
+.index-history-cases-current h3{min-height:48px}
+.index-history-cases-current h3 a{display:inline-block;white-space:normal}
+.index-history-cases-current .index-history-duo-plus{color:var(--accent-ink);padding:0 4px}
+.index-history-cases-current p{font-size:12px;line-height:1.6}
+@media(max-width:760px){.index-history-cases-current h3{min-height:0}.index-history-current{margin-top:32px}}
