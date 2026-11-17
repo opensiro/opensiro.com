@@ -33,6 +33,10 @@ test('monitor assets reproduce the complete source without embedding the full ta
   // part of the Why VSM section, before its concluding bridge.
   assert.match(landing, /class="index-history-cases index-history-cases-current"/);
   assert.match(landing, /id="vsm-current-title"/);
+  for (const logo of ['ypsomed.svg','pims-malik.avif','scio.svg']) {
+    assert.ok(landing.includes('src="assets/vsm-today/' + logo + '"'));
+    assert.ok(fs.statSync(path.join(root, 'assets/vsm-today', logo)).size > 0);
+  }
   assert.ok(landing.indexOf('index-history-cases-current') < landing.indexOf('index-history-bridge'));
 
   assert.match(landing,/action="harness-monitor.html"/);

@@ -42,4 +42,6 @@
 .index-history-cases-current h3 a{display:inline-block;white-space:normal}
 .index-history-cases-current .index-history-duo-plus{color:var(--accent-ink);padding:0 4px}
 .index-history-cases-current p{font-size:12px;line-height:1.6}
+.index-history-cases-current .index-history-brand-logo{display:block;flex:none;width:min(46%,144px);height:42px;object-fit:contain;object-position:right top;filter:grayscale(1) brightness(.25);opacity:.86}
+@media(max-width:520px){.index-history-cases-current .index-history-brand-logo{width:min(48%,150px);height:44px}}
 @media(max-width:760px){.index-history-cases-current h3{min-height:0}.index-history-current{margin-top:32px}}
