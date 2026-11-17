@@ -32,3 +32,19 @@
 .index-history-poster a:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px}
 @media(max-width:760px){.index-history-heading{align-items:start;flex-direction:column;gap:22px}.index-history-age{max-width:none;padding-left:18px}.index-history-timeline{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}.index-history-cases{grid-template-columns:1fr}.index-history-cases article,.index-history-cases article+article{padding:18px 0;border-left:0}.index-history-cases article+article{border-top:1px solid var(--hairline-2)}.index-history-case-top{min-height:55px}.index-history-bridge{grid-template-columns:1fr 30px 1fr;gap:10px;padding:18px 14px}}
 @media(max-width:440px){.index-history-literature span{display:block;margin:8px 0 0}.index-history-timeline b{font-size:20px}.index-history-timeline span{font-size:11px}.index-history-bridge{font-size:14px}.index-history-arrow{font-size:24px}}
+
+/* Present-day evidence: separate company application from consulting and practice. */
+.index-history-current{margin-top:38px;padding-top:30px;border-top:1px solid var(--hairline-2)}
+.index-history-current-intro{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:30px}
+.index-history-current-intro .eyebrow{margin:0 0 14px}
+.index-history-current-intro h3{font-size:clamp(24px,3.1vw,37px);font-weight:normal;line-height:1.2;letter-spacing:-.055em;margin:0}
+.index-history-current-intro>p{font-size:11px;line-height:1.8;color:var(--muted);margin:0;max-width:360px}
+.index-history-current-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:25px;border-block:1px solid var(--hairline-2)}
+.index-history-current-grid article{min-width:0;padding:18px 18px 19px 0}
+.index-history-current-grid article+article{padding-left:18px;border-left:1px solid var(--hairline-2)}
+.index-history-current-grid article>span{display:block;min-height:28px;font-size:9px;line-height:1.5;letter-spacing:.03em;color:var(--accent-ink)}
+.index-history-current-grid h4{font-size:clamp(13px,1.5vw,18px);font-weight:normal;line-height:1.35;letter-spacing:-.025em;margin:9px 0 14px}
+.index-history-current-grid p{font-size:10px;line-height:1.75;color:var(--muted);margin:0}
+.index-history-current-note{font-size:10px;line-height:1.7;color:var(--muted);margin:12px 0 0}
+@media(max-width:760px){.index-history-current-intro{grid-template-columns:1fr;gap:12px}.index-history-current-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.index-history-current-grid article:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--hairline-2)}.index-history-current-grid article:nth-child(4){border-top:1px solid var(--hairline-2)}}
+@media(max-width:440px){.index-history-current-grid{grid-template-columns:1fr}.index-history-current-grid article,.index-history-current-grid article+article{border-left:0;padding:16px 0}.index-history-current-grid article+article{border-top:1px solid var(--hairline-2)}.index-history-current-grid article>span{min-height:0}}
