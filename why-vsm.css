@@ -1,0 +1,34 @@
+/* Why VSM: responsive adaptation of the 2026 pitch-deck history slide. */
+.index-history-poster{background:var(--bg)}
+.index-history-heading{display:flex;align-items:end;justify-content:space-between;gap:36px}
+.index-history-heading h2{margin-bottom:12px}
+.index-history-heading .index-lede{margin-bottom:0}
+.index-history-age{display:flex;align-items:center;gap:14px;max-width:270px;border-left:1px solid var(--hairline-2);padding-left:26px}
+.index-history-age strong{font-size:clamp(52px,6.2vw,82px);line-height:1;letter-spacing:-.09em;color:var(--accent-ink);font-weight:normal}
+.index-history-age span{font-size:10px;line-height:1.7;color:var(--muted)}
+.index-history-age cite{font-style:normal;color:var(--ink)}
+.index-history-timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0;margin:42px 0 24px;list-style:none;border-top:1px solid var(--hairline-2)}
+.index-history-timeline li{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;padding:22px 16px 0 0}
+.index-history-timeline li:before{content:"";position:absolute;top:-5px;left:0;width:9px;height:9px;background:var(--accent-ink)}
+.index-history-timeline b{font-size:22px;font-weight:normal;color:var(--accent-ink)}
+.index-history-timeline span{font-size:13px}
+.index-history-timeline small{font-size:10px;line-height:1.7;color:var(--muted)}
+.index-history-timeline a,.index-history-literature a,.index-history-cases a{color:inherit;text-decoration:none;border-bottom:1px solid var(--hairline-2)}
+.index-history-timeline a:hover,.index-history-literature a:hover,.index-history-cases a:hover{color:var(--accent-ink);border-color:currentColor}
+.index-history-literature{font-size:9px;letter-spacing:.055em;color:var(--accent-ink);margin:0 0 24px}
+.index-history-literature span{color:var(--muted);margin-left:12px;letter-spacing:0}
+.index-history-cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--hairline-2);border-bottom:1px solid var(--hairline-2)}
+.index-history-cases article{min-width:0;padding:20px 22px 22px 0}
+.index-history-cases article+article{border-left:1px solid var(--hairline-2);padding-left:22px}
+.index-history-case-top{display:flex;align-items:start;justify-content:space-between;gap:8px;min-height:64px;color:var(--accent-ink);font-size:10px}
+.index-history-case-top svg{width:50px;height:50px;flex-shrink:0;fill:none;stroke:var(--accent-ink);stroke-width:1.5}
+.index-history-case-top .index-history-accent{fill:#dbe7f8;stroke:var(--accent-ink)}
+.index-history-cases h3{font-weight:normal;font-size:clamp(15px,1.8vw,20px);letter-spacing:-.035em;line-height:1.35;margin:7px 0 16px}
+.index-history-cases p{font-size:12px;margin:0 0 6px}
+.index-history-cases small{font-size:10px;color:var(--muted);line-height:1.6}
+.index-history-bridge{display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:20px;margin-top:28px;padding:25px 28px;background:#e8eef9;font-size:clamp(15px,2.3vw,25px);line-height:1.4;letter-spacing:-.045em}
+.index-history-arrow{text-align:center;font-size:30px;color:var(--accent-ink)}
+.index-history-note{font-size:10px;line-height:1.8;color:var(--muted);margin:14px 0 0}
+.index-history-poster a:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px}
+@media(max-width:760px){.index-history-heading{align-items:start;flex-direction:column;gap:22px}.index-history-age{max-width:none;padding-left:18px}.index-history-timeline{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}.index-history-cases{grid-template-columns:1fr}.index-history-cases article,.index-history-cases article+article{padding:18px 0;border-left:0}.index-history-cases article+article{border-top:1px solid var(--hairline-2)}.index-history-case-top{min-height:55px}.index-history-bridge{grid-template-columns:1fr 30px 1fr;gap:10px;padding:18px 14px}}
+@media(max-width:440px){.index-history-literature span{display:block;margin:8px 0 0}.index-history-timeline b{font-size:20px}.index-history-timeline span{font-size:11px}.index-history-bridge{font-size:14px}.index-history-arrow{font-size:24px}}
