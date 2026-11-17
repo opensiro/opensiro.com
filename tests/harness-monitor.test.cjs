@@ -20,7 +20,11 @@ test('monitor assets reproduce the complete source without embedding the full ta
   assert.equal(JSON.stringify(data.entries.map(e=>context.window.harnessChunks[e.file][e.offset])),JSON.stringify(sourceRows));
   for (const file of ['vsm-index.html','harness-monitor.html']) {
     const html=fs.readFileSync(path.join(root,file),'utf8');
-    assert.ok(Buffer.byteLength(html)<18000);
+    // The Index landing now includes an inspectable Why VSM history section;
+    // the standalone monitor keeps its smaller HTML-shell budget. Neither
+    // page may inline the canonical assessment table (checked below).
+    const shellBudget = file === 'vsm-index.html' ? 24000 : 18000;
+    assert.ok(Buffer.byteLength(html) < shellBudget, `${file} exceeds the ${shellBudget}-byte HTML-shell budget`);
     assert.doesNotMatch(html,/rows-[a-f0-9]+\.js/);
     assert.doesNotMatch(html,/<tr[^>]*data-a=/);
   }
