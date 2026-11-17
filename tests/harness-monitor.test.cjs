@@ -23,12 +23,18 @@ test('monitor assets reproduce the complete source without embedding the full ta
     // The Index landing now includes an inspectable Why VSM history section;
     // the standalone monitor keeps its smaller HTML-shell budget. Neither
     // page may inline the canonical assessment table (checked below).
-    const shellBudget = file === 'vsm-index.html' ? 24000 : 18000;
+    const shellBudget = file === 'vsm-index.html' ? 26000 : 18000;
     assert.ok(Buffer.byteLength(html) < shellBudget, `${file} exceeds the ${shellBudget}-byte HTML-shell budget`);
     assert.doesNotMatch(html,/rows-[a-f0-9]+\.js/);
     assert.doesNotMatch(html,/<tr[^>]*data-a=/);
   }
   const landing=fs.readFileSync(path.join(root,'vsm-index.html'),'utf8');
+  // Present-day VSM examples reuse the historical case language and remain
+  // part of the Why VSM section, before its concluding bridge.
+  assert.match(landing, /class="index-history-cases index-history-cases-current"/);
+  assert.match(landing, /id="vsm-current-title"/);
+  assert.ok(landing.indexOf('index-history-cases-current') < landing.indexOf('index-history-bridge'));
+
   assert.match(landing,/action="harness-monitor.html"/);
   for (const state of ['A(P)','C(P)','Agent-owned','Composable','Parent-assisted','Unknown','No supplied path']) assert.ok(landing.includes(state));
 });
